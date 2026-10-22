@@ -102,6 +102,15 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .att{font:600 13px var(--body);border-radius:99px;padding:3px 12px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer}
 .att[aria-pressed=true]{background:var(--pitch);color:var(--pitch-fg);border-color:var(--pitch)}
 .note{font-size:13px;color:var(--muted);margin-top:14px}
+.perf{display:grid;gap:14px}
+.pr{display:grid;grid-template-columns:minmax(130px,1.2fr) 2fr 1.4fr;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}
+@media(max-width:640px){.pr{grid-template-columns:1fr}}
+.pr h3{margin:0;font-size:15px}
+.pr .meta{font-size:12px;color:var(--muted)}
+.pr .m{display:grid;grid-template-columns:52px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin-bottom:4px}
+.pr .bar{height:8px}
+.pr .bar i.p{background:var(--signal)}
+.pr input{width:100%;font:400 14px var(--body);padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 .loginbox{max-width:520px;margin-inline:auto}
 input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
@@ -292,6 +301,22 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
   <div class="gallery" id="gallery"></div>
 </section>
 
+<!-- PERFORMANCE -->
+<section id="perf" hidden aria-labelledby="t-perf">
+  <div class="stats">
+    <div class="stat"><strong id="pN">0</strong><span>لاعبون تم تقييمهم</span></div>
+    <div class="stat"><strong id="pT">0</strong><span>متوسط المهارة</span></div>
+    <div class="stat"><strong id="pP">0</strong><span>متوسط البدنية</span></div>
+    <div class="stat"><strong id="pTop">-</strong><span>الأعلى تقييمًا</span></div>
+  </div>
+  <div class="panel">
+    <h2>تحليل الأداء</h2>
+    <p class="sub">ترتيب اللاعبين حسب تقييم المدرب، مع ملاحظات التحليل.</p>
+    <div class="tools"><select id="py" aria-label="سنة الميلاد"><option value="">كل السنوات</option></select></div>
+    <div class="perf" id="perfList"></div>
+  </div>
+</section>
+
 <!-- MEDICAL -->
 <section id="med" hidden aria-labelledby="t-med">
   <div class="panel" style="margin-bottom:16px">
@@ -362,23 +387,24 @@ function renderCoach(){
 function init(){
   $("cday").innerHTML=DAYS.map(function(d){return'<option value="'+d.id+'">'+d.name+'</option>'}).join("");
   YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("fy").appendChild(o)});
+  YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("py").appendChild(o)});
   renderSlots();renderAdmin();renderCoach();
 }
-var TABS={parent:"حجز التدريب",admin:"لوحة الإدارة",coach:"كشف الجهاز الفني",media:"الوسائط",med:"الحالة الطبية"};
+var TABS={parent:"حجز التدريب",admin:"لوحة الإدارة",coach:"كشف الجهاز الفني",media:"الوسائط",med:"الحالة الطبية",perf:"تحليل الأداء"};
 var ROLES=[
   {id:"player",name:"لاعب",tabs:["parent"]},
   {id:"coach",name:"مدرب",tabs:["coach"]},
   {id:"admin",name:"إداري",tabs:["admin","parent"]},
   {id:"press",name:"إعلامي",tabs:["media"]},
   {id:"photo",name:"مصور",tabs:["media"]},
-  {id:"injury",name:"د/ إصابات ملاعب",tabs:["med"]},
-  {id:"physio",name:"د/ علاج طبيعي",tabs:["med"]}
+  {id:"doc",name:"د/ إصابات وعلاج طبيعي",tabs:["med"]},
+  {id:"analyst",name:"محلل أداء",tabs:["perf"]}
 ];
 var role=null;
 function showTab(id){
   document.querySelectorAll("#tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.tab===id)});
   Object.keys(TABS).forEach(function(k){$(k).hidden=k!==id});
-  renderAdmin();renderCoach();renderMedia();renderMed();
+  renderAdmin();renderCoach();renderMedia();renderMed();renderPerf();
 }
 $("tabs").addEventListener("click",function(e){var t=e.target.closest("button");if(t)showTab(t.dataset.tab)});
 $("roles").innerHTML=ROLES.map(function(r,i){return'<input type="radio" name="role" id="r_'+r.id+'" value="'+r.id+'"><label for="r_'+r.id+'">'+r.name+'</label>'}).join("");
@@ -396,7 +422,7 @@ $("lform").addEventListener("submit",function(e){
   $("mUp").hidden=role.id!=="photo";$("mDraft").hidden=role.id!=="press";
   $("mTitle").textContent=role.id==="photo"?"معرض الصور":"المحتوى الإعلامي";
   $("mSub").textContent=role.id==="photo"?"ارفع صور التدريبات واللاعبين.":"اختر الصور واكتب نص المنشور.";
-  $("medTitle").textContent=role.id==="physio"?"العلاج الطبيعي":"إصابات الملاعب";
+  $("medTitle").textContent="الإصابات والعلاج الطبيعي";
   showTab(role.tabs[0]);
 });
 $("logout").addEventListener("click",function(){
@@ -414,6 +440,23 @@ function renderMedia(){
   var ph=players.filter(function(p){return!p.photo}).map(function(p){return'<figure><div class="ph">'+esc(p.name.charAt(0))+'</div><figcaption>'+esc(p.name)+'</figcaption></figure>'});
   $("gallery").innerHTML=items.map(function(i){return'<figure><div class="ph"><img alt="" src="'+i.src+'"></div><figcaption>'+esc(i.cap)+'</figcaption></figure>'}).join("")+ph.join("");
 }
+function renderPerf(){
+  if(!role||role.tabs.indexOf("perf")<0)return;
+  var y=$("py").value;
+  var ev=players.filter(function(p){return(p.tech>0||p.phys>0)&&(!y||p.year===y)}).sort(function(a,b){return(b.tech+b.phys)-(a.tech+a.phys)});
+  var avg=function(k){return ev.length?(ev.reduce(function(t,p){return t+p[k]},0)/ev.length).toFixed(1):"0"};
+  $("pN").textContent=ev.length;$("pT").textContent=avg("tech");$("pP").textContent=avg("phys");
+  $("pTop").textContent=ev.length?ev[0].name.split(" ")[0]:"-";
+  $("perfList").innerHTML=ev.length?ev.map(function(p){
+    var i=players.indexOf(p);
+    return'<div class="pr"><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div>'
+      +'<div><div class="m"><span>المهارة</span><div class="bar"><i style="width:'+p.tech*10+'%"></i></div><b>'+p.tech+'</b></div>'
+      +'<div class="m"><span>البدنية</span><div class="bar"><i class="p" style="width:'+p.phys*10+'%"></i></div><b>'+p.phys+'</b></div></div>'
+      +'<input type="text" data-an="'+i+'" value="'+esc(p.anote||"").replace(/"/g,"&quot;")+'" placeholder="ملاحظة التحليل" aria-label="ملاحظة التحليل"></div>';
+  }).join(""):'<p class="note">لا توجد تقييمات بعد. تظهر هنا بعد أن يسجل المدرب التقييم.</p>';
+}
+$("perfList").addEventListener("input",function(e){if(e.target.dataset.an)players[e.target.dataset.an].anote=e.target.value});
+$("py").addEventListener("change",renderPerf);
 function renderMed(){
   if(!role||role.tabs.indexOf("med")<0)return;
   var L={ok:"سليم",inj:"إصابة",rehab:"تحت العلاج"};
