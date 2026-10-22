@@ -102,6 +102,20 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .att{font:600 13px var(--body);border-radius:99px;padding:3px 12px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer}
 .att[aria-pressed=true]{background:var(--pitch);color:var(--pitch-fg);border-color:var(--pitch)}
 .note{font-size:13px;color:var(--muted);margin-top:14px}
+.loginbox{max-width:520px;margin-inline:auto}
+input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.who{margin-inline-start:auto;display:flex;gap:8px;align-items:center}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.gallery figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gallery .ph{aspect-ratio:4/5;background:var(--bg);display:grid;place-items:center;font:700 34px var(--display);color:var(--muted)}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery figcaption{padding:8px 10px;font-size:13px;font-weight:600}
+.medsel{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.medsel button{font:600 13px var(--body);padding:6px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.medsel button[aria-pressed=true].ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.medsel button[aria-pressed=true].inj{background:var(--bad);color:#fff;border-color:var(--bad)}
+.medsel button[aria-pressed=true].rehab{background:var(--warn);color:#fff;border-color:var(--warn)}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
 </style>
@@ -112,13 +126,34 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
   <div>
     <h1>Tachnoball</h1>
   </div>
+  <div class="who" id="who" hidden>
+    <span class="pill wait" id="whoRole"></span>
+    <button type="button" class="att" id="logout">تسجيل الخروج</button>
+  </div>
 </header>
 
-<div class="tabs" role="tablist">
-  <button role="tab" id="t-parent" aria-selected="true" data-tab="parent">حجز التدريب (ولي الأمر)</button>
-  <button role="tab" id="t-admin" aria-selected="false" data-tab="admin">لوحة الإدارة</button>
-  <button role="tab" id="t-coach" aria-selected="false" data-tab="coach">كشف الجهاز الفني</button>
-</div>
+<!-- LOGIN -->
+<section id="login" class="panel loginbox" aria-labelledby="lgT">
+  <h2 id="lgT">تسجيل الدخول</h2>
+  <p class="sub">اختر صفتك ثم ادخل بياناتك.</p>
+  <form id="lform" novalidate>
+    <fieldset>
+      <legend>الصفة</legend>
+      <div class="chips" id="roles"></div>
+    </fieldset>
+    <div class="row">
+      <div><label for="lu">رقم الهاتف أو الكود</label><input type="text" id="lu" autocomplete="username" dir="ltr" style="text-align:end"></div>
+      <div><label for="lp">كلمة المرور</label><input type="password" id="lp" autocomplete="current-password" dir="ltr" style="text-align:end"></div>
+    </div>
+    <p class="err" id="lerr" role="alert"></p>
+    <button class="btn alt" type="submit">دخول</button>
+    <p class="note">دخول تجريبي: أي بيانات تعمل في هذا العرض.</p>
+  </form>
+</section>
+
+<div id="app" hidden>
+
+<div class="tabs" role="tablist" id="tabs"></div>
 <p><span class="sample">تصميم مبدئي · مواعيد وأسماء تجريبية</span></p>
 
 <!-- PARENT -->
@@ -160,9 +195,9 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
         <div class="chips" id="pos">
           <input type="radio" name="pos" id="p1" value="حارس مرمى"><label for="p1">حارس مرمى</label>
           <input type="radio" name="pos" id="p2" value="مدافع"><label for="p2">مدافع</label>
-          <input type="radio" name="pos" id="p3" value="خط وسط"><label for="p3">خط وسط</label>
-          <input type="radio" name="pos" id="p4" value="مهاجم"><label for="p4">مهاجم</label>
-          <input type="radio" name="pos" id="p5" value="أي مركز" checked><label for="p5">لم يحدد</label>
+          <input type="radio" name="pos" id="p3" value="وسط مدافع"><label for="p3">وسط مدافع</label>
+          <input type="radio" name="pos" id="p4" value="وسط مهاجم"><label for="p4">وسط مهاجم</label>
+          <input type="radio" name="pos" id="p5" value="مهاجم"><label for="p5">مهاجم</label>
         </div>
       </fieldset>
       <fieldset>
@@ -253,6 +288,30 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
   </div>
   <div class="players" id="players"></div>
 </section>
+
+<!-- MEDIA -->
+<section id="media" hidden aria-labelledby="t-media">
+  <div class="panel" style="margin-bottom:16px">
+    <h2 id="mTitle">الوسائط</h2>
+    <p class="sub" id="mSub"></p>
+    <div id="mUp" hidden><label class="btn alt sm" for="mfile">رفع صور</label><input type="file" id="mfile" accept="image/*" multiple hidden></div>
+    <div id="mDraft" hidden>
+      <label for="draft">مسودة المنشور</label>
+      <textarea id="draft" rows="3" placeholder="اكتب نص المنشور هنا"></textarea>
+    </div>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<!-- MEDICAL -->
+<section id="med" hidden aria-labelledby="t-med">
+  <div class="panel" style="margin-bottom:16px">
+    <h2 id="medTitle">الحالة الطبية</h2>
+    <p class="sub">البيانات الطبية تظهر للأطباء فقط ولا تظهر لباقي المستخدمين.</p>
+  </div>
+  <div class="players" id="medList"></div>
+</section>
+</div>
 </div>
 
 <script>
@@ -264,11 +323,11 @@ var DAYS=[
 var YEARS=["2010","2011","2012","2013","2014","2015 أو أحدث"];
 var seed=[
   ["أحمد محمد علي حسن","2010","مهاجم","d1",1,8,7,"pass"],
-  ["يوسف محمود سعيد إبراهيم","2010","خط وسط","d1",1,6,6,"retry"],
+  ["يوسف محمود سعيد إبراهيم","2010","وسط مهاجم","d1",1,6,6,"retry"],
   ["عمر خالد مصطفى فتحي","2011","مدافع","d1",1,5,4,"fail"],
   ["مازن طارق عادل رضا","2012","حارس مرمى","d2",0,0,0,"wait"],
   ["ياسين هاني كمال السيد","2010","مدافع","d2",0,0,0,"wait"],
-  ["آدم وليد صلاح نصر","2013","خط وسط","d3",0,0,0,"wait"]
+  ["آدم وليد صلاح نصر","2013","وسط مدافع","d3",0,0,0,"wait"]
 ];
 var players=seed.map(function(s,i){return{code:"TB-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],tech:s[5],phys:s[6],st:s[7]}});
 var ST={pass:"اجتاز",retry:"إعادة تدريب",fail:"لم يجتز",wait:"بانتظار التدريب"};
@@ -316,12 +375,71 @@ function init(){
   YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("fy").appendChild(o)});
   renderSlots();renderAdmin();renderCoach();
 }
-document.querySelector(".tabs").addEventListener("click",function(e){
-  var t=e.target.closest("button");if(!t)return;
-  document.querySelectorAll(".tabs button").forEach(function(b){b.setAttribute("aria-selected",b===t)});
-  ["parent","admin","coach"].forEach(function(id){$(id).hidden=id!==t.dataset.tab});
-  renderAdmin();renderCoach();
+var TABS={parent:"حجز التدريب",admin:"لوحة الإدارة",coach:"كشف الجهاز الفني",media:"الوسائط",med:"الحالة الطبية"};
+var ROLES=[
+  {id:"player",name:"لاعب",tabs:["parent"]},
+  {id:"coach",name:"مدرب",tabs:["coach"]},
+  {id:"admin",name:"إداري",tabs:["admin","parent"]},
+  {id:"press",name:"إعلامي",tabs:["media"]},
+  {id:"photo",name:"مصور",tabs:["media"]},
+  {id:"injury",name:"د/ إصابات ملاعب",tabs:["med"]},
+  {id:"physio",name:"د/ علاج طبيعي",tabs:["med"]}
+];
+var role=null;
+function showTab(id){
+  document.querySelectorAll("#tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.tab===id)});
+  Object.keys(TABS).forEach(function(k){$(k).hidden=k!==id});
+  renderAdmin();renderCoach();renderMedia();renderMed();
+}
+$("tabs").addEventListener("click",function(e){var t=e.target.closest("button");if(t)showTab(t.dataset.tab)});
+$("roles").innerHTML=ROLES.map(function(r,i){return'<input type="radio" name="role" id="r_'+r.id+'" value="'+r.id+'"><label for="r_'+r.id+'">'+r.name+'</label>'}).join("");
+$("lform").addEventListener("submit",function(e){
+  e.preventDefault();
+  var sel=document.querySelector("input[name=role]:checked");
+  if(!sel){$("lerr").textContent="اختر صفتك أولًا.";return}
+  if(!$("lu").value.trim()||!$("lp").value){$("lerr").textContent="اكتب رقم الهاتف أو الكود وكلمة المرور.";return}
+  $("lerr").textContent="";
+  role=ROLES.filter(function(r){return r.id===sel.value})[0];
+  $("login").hidden=true;$("app").hidden=false;$("who").hidden=false;
+  $("whoRole").textContent=role.name;
+  $("tabs").innerHTML=role.tabs.map(function(t){return'<button role="tab" id="t-'+t+'" data-tab="'+t+'" aria-selected="false">'+TABS[t]+'</button>'}).join("");
+  $("tabs").hidden=role.tabs.length<2;
+  $("mUp").hidden=role.id!=="photo";$("mDraft").hidden=role.id!=="press";
+  $("mTitle").textContent=role.id==="photo"?"معرض الصور":"المحتوى الإعلامي";
+  $("mSub").textContent=role.id==="photo"?"ارفع صور التدريبات واللاعبين.":"اختر الصور واكتب نص المنشور.";
+  $("medTitle").textContent=role.id==="physio"?"العلاج الطبيعي":"إصابات الملاعب";
+  showTab(role.tabs[0]);
 });
+$("logout").addEventListener("click",function(){
+  role=null;$("app").hidden=true;$("who").hidden=true;$("login").hidden=false;$("lp").value="";
+});
+var shots=[];
+$("mfile").addEventListener("change",function(e){
+  Array.prototype.forEach.call(e.target.files,function(f){
+    var r=new FileReader();r.onload=function(){shots.push({src:r.result,cap:"صورة جديدة"});renderMedia()};r.readAsDataURL(f);
+  });e.target.value="";
+});
+function renderMedia(){
+  if(!role||role.tabs.indexOf("media")<0)return;
+  var items=players.filter(function(p){return p.photo}).map(function(p){return{src:p.photo,cap:p.name}}).concat(shots);
+  var ph=players.filter(function(p){return!p.photo}).map(function(p){return'<figure><div class="ph">'+esc(p.name.charAt(0))+'</div><figcaption>'+esc(p.name)+'</figcaption></figure>'});
+  $("gallery").innerHTML=items.map(function(i){return'<figure><div class="ph"><img alt="" src="'+i.src+'"></div><figcaption>'+esc(i.cap)+'</figcaption></figure>'}).join("")+ph.join("");
+}
+function renderMed(){
+  if(!role||role.tabs.indexOf("med")<0)return;
+  var L={ok:"سليم",inj:"إصابة",rehab:"تحت العلاج"};
+  $("medList").innerHTML=players.map(function(p,i){
+    var m=p.med||"ok";
+    return'<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div></header><div class="medsel">'
+      +["ok","inj","rehab"].map(function(k){return'<button type="button" class="'+k+'" data-mi="'+i+'" data-m="'+k+'" aria-pressed="'+(m===k)+'">'+L[k]+'</button>'}).join("")
+      +'</div><input type="text" data-mn="'+i+'" value="'+esc(p.medNote||"").replace(/"/g,"&quot;")+'" placeholder="ملاحظة طبية" aria-label="ملاحظة طبية"></article>';
+  }).join("");
+}
+$("medList").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b||!b.dataset.m)return;
+  players[b.dataset.mi].med=b.dataset.m;renderMed();
+});
+$("medList").addEventListener("input",function(e){if(e.target.dataset.mn)players[e.target.dataset.mn].medNote=e.target.value});
 ["q","fy","fs"].forEach(function(id){$(id).addEventListener("input",renderAdmin)});
 $("cday").addEventListener("change",renderCoach);
 $("players").addEventListener("click",function(e){
@@ -365,7 +483,9 @@ $("form").addEventListener("submit",function(e){
   if(!slot){err.textContent="اختر موعد التدريب.";return}
   if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
   err.textContent="";
-  var pos=document.querySelector("input[name=pos]:checked").value;
+  var pp=document.querySelector("input[name=pos]:checked");
+  if(!pp){err.textContent="اختر مركز اللاعب.";return}
+  var pos=pp.value;
   var code="TB-"+String(players.length+1).padStart(4,"0");
   players.push({photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
   $("tCode").textContent=code;
