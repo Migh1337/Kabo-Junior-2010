@@ -115,7 +115,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 </header>
 
 <div class="tabs" role="tablist">
-  <button role="tab" id="t-parent" aria-selected="true" data-tab="parent">حجز الاختبار (ولي الأمر)</button>
+  <button role="tab" id="t-parent" aria-selected="true" data-tab="parent">حجز التدريب (ولي الأمر)</button>
   <button role="tab" id="t-admin" aria-selected="false" data-tab="admin">لوحة الإدارة</button>
   <button role="tab" id="t-coach" aria-selected="false" data-tab="coach">كشف الجهاز الفني</button>
 </div>
@@ -124,12 +124,12 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 <!-- PARENT -->
 <section id="parent" class="grid" aria-labelledby="t-parent">
   <div class="panel">
-    <h2>استمارة اختبارات الناشئين</h2>
+    <h2>استمارة تدريبات الناشئين</h2>
     <p class="sub">املأ البيانات واحجز موعد ابنك. ستحصل على كود حجز خاص به.</p>
     <form id="form" novalidate>
       <fieldset>
         <legend>بيانات اللاعب</legend>
-        <label for="pname">اسم اللاعب (ثلاثي)</label>
+        <label for="pname">اسم اللاعب</label>
         <input type="text" id="pname" autocomplete="off">
         <label style="margin-top:12px">صورة اللاعب</label>
         <div class="photo">
@@ -179,12 +179,12 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
         <p class="note" style="margin-top:6px">النادي السابق لا يؤثر على قبول التسجيل.</p>
       </fieldset>
       <fieldset>
-        <legend>موعد الاختبار</legend>
+        <legend>موعد التدريب</legend>
         <div class="chips" id="slots"></div>
       </fieldset>
       <fieldset>
         <label class="consent"><input type="checkbox" id="consent">
-          <span>أوافق على تسجيل ابني في الاختبارات وعلى معالجة بياناته وصورته داخل النادي فقط، وألتزم بتعليمات الاختبار وأقر بسلامته الصحية لأداء المجهود البدني.</span></label>
+          <span>أوافق على تسجيل ابني في التدريبات وعلى معالجة بياناته وصورته داخل النادي فقط، وألتزم بتعليمات التدريب وأقر بسلامته الصحية لأداء المجهود البدني.</span></label>
       </fieldset>
       <button class="btn" type="submit">تأكيد الحجز</button>
       <p class="err" id="err" role="alert"></p>
@@ -194,7 +194,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
   <aside class="panel">
     <div id="ticketBox" hidden>
       <h2>تم الحجز</h2>
-      <p class="sub">احتفظ بهذا الكود وأحضره يوم الاختبار.</p>
+      <p class="sub">احتفظ بهذا الكود وأحضره يوم التدريب.</p>
       <div class="ticket">
         <div class="code" id="tCode"></div>
         <dl id="tInfo"></dl>
@@ -220,7 +220,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
     <div class="stat"><strong id="sAll">0</strong><span>إجمالي المتقدمين</span></div>
     <div class="stat"><strong id="sAtt">0</strong><span>حضروا</span></div>
     <div class="stat"><strong id="sPass">0</strong><span>اجتازوا</span></div>
-    <div class="stat"><strong id="sRetry">0</strong><span>إعادة اختبار</span></div>
+    <div class="stat"><strong id="sRetry">0</strong><span>إعادة تدريب</span></div>
   </div>
   <div class="grid">
     <div class="panel">
@@ -229,7 +229,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
       <div class="tools">
         <input type="text" id="q" placeholder="بحث بالاسم أو الكود" aria-label="بحث">
         <select id="fy" aria-label="سنة الميلاد"><option value="">كل السنوات</option></select>
-        <select id="fs" aria-label="الحالة"><option value="">كل الحالات</option><option value="wait">بانتظار الاختبار</option><option value="pass">اجتاز</option><option value="retry">إعادة اختبار</option><option value="fail">لم يجتز</option></select>
+        <select id="fs" aria-label="الحالة"><option value="">كل الحالات</option><option value="wait">بانتظار التدريب</option><option value="pass">اجتاز</option><option value="retry">إعادة تدريب</option><option value="fail">لم يجتز</option></select>
       </div>
       <div class="tablebox"><table>
         <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>طول/وزن</th><th>المركز</th><th>اليوم</th><th>الحالة</th></tr></thead>
@@ -270,8 +270,8 @@ var seed=[
   ["ياسين هاني كمال السيد","2010","مدافع","d2",0,0,0,"wait"],
   ["آدم وليد صلاح نصر","2013","خط وسط","d3",0,0,0,"wait"]
 ];
-var players=seed.map(function(s,i){return{code:"KJ-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],tech:s[5],phys:s[6],st:s[7]}});
-var ST={pass:"اجتاز",retry:"إعادة اختبار",fail:"لم يجتز",wait:"بانتظار الاختبار"};
+var players=seed.map(function(s,i){return{code:"TB-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],tech:s[5],phys:s[6],st:s[7]}});
+var ST={pass:"اجتاز",retry:"إعادة تدريب",fail:"لم يجتز",wait:"بانتظار التدريب"};
 var $=function(i){return document.getElementById(i)};
 function dayName(id){return DAYS.filter(function(d){return d.id===id})[0].name}
 function used(id){return players.filter(function(p){return p.day===id}).length}
@@ -362,11 +362,11 @@ $("form").addEventListener("submit",function(e){
   if(!(h>=100&&h<=220)){err.textContent="اكتب الطول بالسنتيمتر (من 100 إلى 220).";return}
   if(!(w>=20&&w<=150)){err.textContent="اكتب الوزن بالكيلوجرام (من 20 إلى 150).";return}
   if(!/^01[0-9]{9}$/.test(ph)){err.textContent="رقم الهاتف يجب أن يكون 11 رقمًا ويبدأ بـ 01.";return}
-  if(!slot){err.textContent="اختر موعد الاختبار.";return}
+  if(!slot){err.textContent="اختر موعد التدريب.";return}
   if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
   err.textContent="";
   var pos=document.querySelector("input[name=pos]:checked").value;
-  var code="KJ-"+String(players.length+1).padStart(4,"0");
+  var code="TB-"+String(players.length+1).padStart(4,"0");
   players.push({photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
   $("tCode").textContent=code;
   $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
