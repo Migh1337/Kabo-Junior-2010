@@ -115,6 +115,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .facebook .ico{background:#1877f2}.whatsapp .ico{background:#128c4a}.telegram .ico{background:#229ed9}
 .instagram .ico{background:linear-gradient(45deg,#f09433,#dc2743 55%,#bc1888)}
 .tiktok .ico{background:var(--fg);color:var(--bg)}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
 .loginbox{max-width:520px;margin-inline:auto}
 input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
@@ -183,10 +184,10 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
         <div class="photo">
           <div class="pv" id="pv" aria-hidden="true">لا توجد صورة</div>
           <div class="pb">
-            <label class="btn alt sm" for="cam">التقاط صورة</label>
-            <label class="btn sm ghost" for="up">رفع من الجهاز</label>
-            <input type="file" id="cam" accept="image/*" capture="user" hidden>
-            <input type="file" id="up" accept="image/*" hidden>
+            <button type="button" class="btn alt sm" id="camBtn">التقاط صورة</button>
+            <button type="button" class="btn sm ghost" id="upBtn">رفع من الجهاز</button>
+            <input type="file" id="cam" class="vh" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+            <input type="file" id="up" class="vh" accept="image/*" tabindex="-1" aria-hidden="true">
             <span class="note" style="margin:0">صورة حديثة وواضحة للوجه.</span>
           </div>
         </div>
@@ -516,6 +517,8 @@ function onPhoto(e){
   };
   r.readAsDataURL(f);e.target.value="";
 }
+$("camBtn").addEventListener("click",function(){$("cam").click()});
+$("upBtn").addEventListener("click",function(){$("up").click()});
 $("cam").addEventListener("change",onPhoto);$("up").addEventListener("change",onPhoto);
 $("form").addEventListener("submit",function(e){
   e.preventDefault();
