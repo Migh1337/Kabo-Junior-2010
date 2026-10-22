@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/trusting-hopper-iyoty0]
-    paths: [prototype/**, package.json, capacitor.config.json, .github/workflows/build-apk.yml]
+    paths: [prototype/**, assets/**, package.json, capacitor.config.json, .github/workflows/build-apk.yml]
 
 jobs:
   apk:
@@ -23,6 +23,8 @@ jobs:
       - run: npx cap add android
       - name: Allow camera for photo capture
         run: sed -i 's|</manifest>|    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>|' android/app/src/main/AndroidManifest.xml
+      - name: Generate app icons from assets/icon.png
+        run: npx @capacitor/assets generate --android --iconBackgroundColor '#0b1220' --iconBackgroundColorDark '#0b1220'
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android
