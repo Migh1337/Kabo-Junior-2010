@@ -92,8 +92,6 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .player header{padding:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .player h3{margin:0;font-size:16px}
 .player .meta{font-size:12px;color:var(--muted)}
-.score{display:grid;grid-template-columns:60px 1fr 28px;gap:8px;align-items:center;font-size:13px}
-.score input{accent-color:var(--pitch);width:100%}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .seg button{font:600 13px var(--body);padding:6px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
 .seg button[aria-pressed=true].pass{background:var(--ok);color:#fff;border-color:var(--ok)}
@@ -107,9 +105,6 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 @media(max-width:640px){.pr{grid-template-columns:1fr}}
 .pr h3{margin:0;font-size:15px}
 .pr .meta{font-size:12px;color:var(--muted)}
-.pr .m{display:grid;grid-template-columns:52px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin-bottom:4px}
-.pr .bar{height:8px}
-.pr .bar i.p{background:var(--signal)}
 .pr input{width:100%;font:400 14px var(--body);padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 .loginbox{max-width:520px;margin-inline:auto}
 input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
@@ -281,7 +276,7 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
 <section id="coach" hidden aria-labelledby="t-coach">
   <div class="panel" style="margin-bottom:16px">
     <h2>كشف التقييم</h2>
-    <p class="sub">سجل الحضور وقيّم كل لاعب من 10 في المهارة والبدنية، ثم حدد القرار.</p>
+    <p class="sub">سجل الحضور لكل لاعب، ثم حدد القرار.</p>
     <div class="tools"><select id="cday" aria-label="اليوم"></select></div>
   </div>
   <div class="players" id="players"></div>
@@ -304,14 +299,14 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
 <!-- PERFORMANCE -->
 <section id="perf" hidden aria-labelledby="t-perf">
   <div class="stats">
-    <div class="stat"><strong id="pN">0</strong><span>لاعبون تم تقييمهم</span></div>
-    <div class="stat"><strong id="pT">0</strong><span>متوسط المهارة</span></div>
-    <div class="stat"><strong id="pP">0</strong><span>متوسط البدنية</span></div>
-    <div class="stat"><strong id="pTop">-</strong><span>الأعلى تقييمًا</span></div>
+    <div class="stat"><strong id="pN">0</strong><span>اللاعبون</span></div>
+    <div class="stat"><strong id="pT">0</strong><span>حضروا</span></div>
+    <div class="stat"><strong id="pP">0</strong><span>اجتازوا</span></div>
+    <div class="stat"><strong id="pTop">0%</strong><span>نسبة الاجتياز من الحضور</span></div>
   </div>
   <div class="panel">
     <h2>تحليل الأداء</h2>
-    <p class="sub">ترتيب اللاعبين حسب تقييم المدرب، مع ملاحظات التحليل.</p>
+    <p class="sub">حالة كل لاعب وحضوره، مع ملاحظات التحليل.</p>
     <div class="tools"><select id="py" aria-label="سنة الميلاد"><option value="">كل السنوات</option></select></div>
     <div class="perf" id="perfList"></div>
   </div>
@@ -336,14 +331,14 @@ var DAYS=[
 ];
 var YEARS=["2010","2011","2012","2013","2014","2015 أو أحدث"];
 var seed=[
-  ["أحمد محمد علي حسن","2010","مهاجم","d1",1,8,7,"pass"],
-  ["يوسف محمود سعيد إبراهيم","2010","وسط مهاجم","d1",1,6,6,"retry"],
-  ["عمر خالد مصطفى فتحي","2011","مدافع","d1",1,5,4,"fail"],
-  ["مازن طارق عادل رضا","2012","حارس مرمى","d2",0,0,0,"wait"],
-  ["ياسين هاني كمال السيد","2010","مدافع","d2",0,0,0,"wait"],
-  ["آدم وليد صلاح نصر","2013","وسط مدافع","d3",0,0,0,"wait"]
+  ["أحمد محمد علي حسن","2010","مهاجم","d1",1,"pass"],
+  ["يوسف محمود سعيد إبراهيم","2010","وسط مهاجم","d1",1,"retry"],
+  ["عمر خالد مصطفى فتحي","2011","مدافع","d1",1,"fail"],
+  ["مازن طارق عادل رضا","2012","حارس مرمى","d2",0,"wait"],
+  ["ياسين هاني كمال السيد","2010","مدافع","d2",0,"wait"],
+  ["آدم وليد صلاح نصر","2013","وسط مدافع","d3",0,"wait"]
 ];
-var players=seed.map(function(s,i){return{code:"TB-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],tech:s[5],phys:s[6],st:s[7]}});
+var players=seed.map(function(s,i){return{code:"TB-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],st:s[5]}});
 var ST={pass:"اجتاز",retry:"إعادة تدريب",fail:"لم يجتز",wait:"بانتظار التدريب"};
 var $=function(i){return document.getElementById(i)};
 function dayName(id){return DAYS.filter(function(d){return d.id===id})[0].name}
@@ -379,8 +374,6 @@ function renderCoach(){
     var i=players.indexOf(p);
     function btn(k){return '<button type="button" class="'+k+'" data-i="'+i+'" data-st="'+k+'" aria-pressed="'+(p.st===k)+'">'+ST[k]+'</button>'}
     return '<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
-      +'<div class="score"><span>المهارة</span><input type="range" min="0" max="10" value="'+p.tech+'" data-k="tech" data-i="'+i+'" aria-label="المهارة"><b>'+p.tech+'</b></div>'
-      +'<div class="score"><span>البدنية</span><input type="range" min="0" max="10" value="'+p.phys+'" data-k="phys" data-i="'+i+'" aria-label="البدنية"><b>'+p.phys+'</b></div>'
       +'<div class="seg">'+btn("pass")+btn("retry")+btn("fail")+'</div></article>';
   }).join(""):'<div class="panel">لا يوجد لاعبون في هذا اليوم بعد.</div>';
 }
@@ -443,17 +436,16 @@ function renderMedia(){
 function renderPerf(){
   if(!role||role.tabs.indexOf("perf")<0)return;
   var y=$("py").value;
-  var ev=players.filter(function(p){return(p.tech>0||p.phys>0)&&(!y||p.year===y)}).sort(function(a,b){return(b.tech+b.phys)-(a.tech+a.phys)});
-  var avg=function(k){return ev.length?(ev.reduce(function(t,p){return t+p[k]},0)/ev.length).toFixed(1):"0"};
-  $("pN").textContent=ev.length;$("pT").textContent=avg("tech");$("pP").textContent=avg("phys");
-  $("pTop").textContent=ev.length?ev[0].name.split(" ")[0]:"-";
+  var ev=players.filter(function(p){return!y||p.year===y});
+  var at=ev.filter(function(p){return p.att}).length,ps=ev.filter(function(p){return p.st==="pass"}).length;
+  $("pN").textContent=ev.length;$("pT").textContent=at;$("pP").textContent=ps;
+  $("pTop").textContent=(at?Math.round(ps/at*100):0)+"%";
   $("perfList").innerHTML=ev.length?ev.map(function(p){
     var i=players.indexOf(p);
     return'<div class="pr"><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div>'
-      +'<div><div class="m"><span>المهارة</span><div class="bar"><i style="width:'+p.tech*10+'%"></i></div><b>'+p.tech+'</b></div>'
-      +'<div class="m"><span>البدنية</span><div class="bar"><i class="p" style="width:'+p.phys*10+'%"></i></div><b>'+p.phys+'</b></div></div>'
+      +'<div><span class="pill '+p.st+'">'+ST[p.st]+'</span> <span class="pill wait">'+(p.att?'حاضر':'غائب')+'</span></div>'
       +'<input type="text" data-an="'+i+'" value="'+esc(p.anote||"").replace(/"/g,"&quot;")+'" placeholder="ملاحظة التحليل" aria-label="ملاحظة التحليل"></div>';
-  }).join(""):'<p class="note">لا توجد تقييمات بعد. تظهر هنا بعد أن يسجل المدرب التقييم.</p>';
+  }).join(""):'<p class="note">لا يوجد لاعبون لهذه السنة.</p>';
 }
 $("perfList").addEventListener("input",function(e){if(e.target.dataset.an)players[e.target.dataset.an].anote=e.target.value});
 $("py").addEventListener("change",renderPerf);
@@ -478,10 +470,6 @@ $("players").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
   if(b.dataset.st){players[b.dataset.i].st=b.dataset.st;players[b.dataset.i].att=true;renderCoach()}
   if(b.dataset.att){var p=players[b.dataset.att];p.att=!p.att;renderCoach()}
-});
-$("players").addEventListener("input",function(e){
-  var r=e.target;if(r.type!=="range")return;
-  players[r.dataset.i][r.dataset.k]=+r.value;r.nextElementSibling.textContent=r.value;
 });
 var photo="";
 function onPhoto(e){
@@ -520,7 +508,7 @@ $("form").addEventListener("submit",function(e){
   if(!pp){err.textContent="اختر مركز اللاعب.";return}
   var pos=pp.value;
   var code="TB-"+String(players.length+1).padStart(4,"0");
-  players.push({gov:$("area").value,addr:ad,photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
+  players.push({gov:$("area").value,addr:ad,photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,st:"wait"});
   $("tCode").textContent=code;
   $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>المحافظة</dt><dd>"+esc($("area").value)+"</dd><dt>العنوان</dt><dd>"+esc(ad)+"</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
   $("ticketBox").hidden=false;$("howBox").hidden=true;
