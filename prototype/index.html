@@ -135,7 +135,16 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .pfd{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:14px;margin:0 0 12px}
 .pfd dt{color:var(--muted)}.pfd dd{margin:0;font-weight:600}
 #profile h3{font-size:15px;margin:14px 0 6px}
-@media print{body *{visibility:hidden}#ticketBox,#ticketBox *{visibility:visible}#ticketBox{position:absolute;inset:0 auto auto 0;width:100%}}
+@page{margin:0}
+@media print{
+  html,body{background:#fff!important;color:#000}
+  body{padding:0!important}
+  body.printing .wrap *:not(.pk){display:none!important}
+  body.printing #ticketBox .ticket{margin:12mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;color:#000;border-color:#0f4d38}
+  body.printing .pa{display:block!important;border:0!important;padding:0!important;margin:0!important;background:none!important;width:100%!important;max-width:none!important}
+  body.printing .ticket .code{color:#e8590c}
+  body.printing .ticket dt{color:#555}
+}
 .loginbox{max-width:520px;margin-inline:auto}
 input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
@@ -737,6 +746,17 @@ $("vadd").addEventListener("click",function(){
   players[+$("vp").value].vids.push({u:u,c:$("vc").value.trim()});$("vu").value="";$("vc").value="";say("verr","");renderPerf();
 });
 $("printBtn").addEventListener("click",function(){try{window.print()}catch(x){}});
+window.addEventListener("beforeprint",function(){
+  var t=document.querySelector("#ticketBox .ticket");
+  if(!t||$("ticketBox").hidden||$("parent").hidden)return;
+  for(var n=t;n&&n!==document.body;n=n.parentElement){n.classList.add("pk");if(n!==t)n.classList.add("pa")}
+  t.querySelectorAll("*").forEach(function(x){x.classList.add("pk")});
+  document.body.classList.add("printing");
+});
+window.addEventListener("afterprint",function(){
+  document.body.classList.remove("printing");
+  document.querySelectorAll(".pk,.pa").forEach(function(x){x.classList.remove("pk","pa")});
+});
 init();
 </script>
 </html>
