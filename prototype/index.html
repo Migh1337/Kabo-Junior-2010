@@ -3,6 +3,7 @@
 <title>Tachnoball</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Reem+Kufi:wght@600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
 /* Layout: sticky club header, three role tabs (parent booking / admin desk / coach sheet), single column on phone, 2-col on desktop */
 :root{
@@ -79,7 +80,7 @@ input[type=text],input[type=tel],select{width:100%;font:400 16px var(--body);pad
 .tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .tools select,.tools input{width:auto;flex:1 1 140px}
 .tablebox{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
 th{text-align:start;color:var(--muted);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:2px solid var(--line)}
 td{padding:10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitch);font-weight:700}
@@ -116,6 +117,25 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
 .instagram .ico{background:linear-gradient(45deg,#f09433,#dc2743 55%,#bc1888)}
 .tiktok .ico{background:var(--fg);color:var(--bg)}
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.lnk{font:inherit;background:none;border:0;padding:0;color:var(--pitch);font-weight:700;cursor:pointer;text-align:start;text-decoration:underline;text-underline-offset:3px}
+.lnk:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.qr{display:inline-block;background:#fff;padding:6px;border-radius:8px;margin-top:10px}
+.qr:empty{display:none}
+.qr svg{width:140px;height:140px;display:block}
+.ann{border-top:1px solid var(--line);padding-block:12px}
+.ann h3{margin:0 0 4px;font-size:16px}.ann p{margin:0 0 8px;font-size:14px}
+.annf{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vl{margin:8px 0 0;padding:0 18px 0 0;font-size:13px;display:grid;gap:4px}
+.injf{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.injf input{flex:1 1 110px;width:auto;font:400 14px var(--body);padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+.pfh{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.pfh h2{margin:0}
+.pfph{width:72px;height:90px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font:700 28px var(--display);color:var(--muted);overflow:hidden;flex:none}
+.pfph img{width:100%;height:100%;object-fit:cover}
+.pfd{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:14px;margin:0 0 12px}
+.pfd dt{color:var(--muted)}.pfd dd{margin:0;font-weight:600}
+#profile h3{font-size:15px;margin:14px 0 6px}
+@media print{body *{visibility:hidden}#ticketBox,#ticketBox *{visibility:visible}#ticketBox{position:absolute;inset:0 auto auto 0;width:100%}}
 .loginbox{max-width:520px;margin-inline:auto}
 input[type=password],textarea{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
@@ -163,12 +183,15 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
     <button class="btn alt" type="submit">دخول</button>
     <p class="note">دخول تجريبي: أي بيانات تعمل في هذا العرض.</p>
   </form>
+  <div id="annLogin" style="margin-top:20px"></div>
 </section>
 
 <div id="app" hidden>
 
 <div class="tabs" role="tablist" id="tabs"></div>
 <p><span class="sample">تصميم مبدئي · مواعيد وأسماء تجريبية</span></p>
+
+<section id="profile" class="panel" hidden style="margin-bottom:16px" aria-live="polite"></section>
 
 <!-- PARENT -->
 <section id="parent" class="grid" aria-labelledby="t-parent">
@@ -203,6 +226,8 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
         </div>
         <label for="addr" style="margin-top:12px">العنوان</label>
         <input type="text" id="addr" autocomplete="street-address" placeholder="الشارع، المنطقة، رقم العقار">
+        <label for="gph" style="margin-top:12px">رقم هاتف ولي الأمر</label>
+        <input type="tel" id="gph" inputmode="numeric" placeholder="01XXXXXXXXX" dir="ltr" style="text-align:end">
         <div class="row" style="margin-top:12px">
           <div><label for="ht">الطول (سم)</label><input type="text" id="ht" inputmode="numeric" placeholder="مثال 165" dir="ltr" style="text-align:end"></div>
           <div><label for="wt">الوزن (كجم)</label><input type="text" id="wt" inputmode="numeric" placeholder="مثال 52" dir="ltr" style="text-align:end"></div>
@@ -223,6 +248,7 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
       <fieldset>
         <label class="consent"><input type="checkbox" id="consent">
           <span>أوافق على تسجيل ابني في التدريبات وعلى معالجة بياناته وصورته داخل النادي فقط، وألتزم بتعليمات التدريب وأقر بسلامته الصحية لأداء المجهود البدني.</span></label>
+        <label class="consent" style="margin-top:8px"><input type="checkbox" id="pub"><span>أوافق على نشر صور ابني في صفحات النادي (اختياري).</span></label>
       </fieldset>
       <button class="btn" type="submit">تأكيد الحجز</button>
       <p class="err" id="err" role="alert"></p>
@@ -235,10 +261,13 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
       <p class="sub">احتفظ بهذا الكود وأحضره يوم التدريب.</p>
       <div class="ticket">
         <div class="code" id="tCode"></div>
+        <div class="qr" id="qr"></div>
         <dl id="tInfo"></dl>
       </div>
+      <button type="button" class="btn sm ghost" id="printBtn" style="margin-top:12px">طباعة البطاقة</button>
       <p class="note">هذا العرض تجريبي ولا يحفظ بياناتك خارج هذه الصفحة.</p>
     </div>
+    <div id="annParent"></div>
     <div id="howBox">
       <h2>خطوات التسجيل</h2>
       <p class="sub">دقيقتان من الموبايل بدون تحميل تطبيق.</p>
@@ -270,14 +299,23 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
         <select id="fs" aria-label="الحالة"><option value="">كل الحالات</option><option value="wait">بانتظار التدريب</option><option value="pass">اجتاز</option><option value="retry">إعادة تدريب</option><option value="fail">لم يجتز</option></select>
       </div>
       <div class="tablebox"><table>
-        <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>طول/وزن</th><th>المركز</th><th>اليوم</th><th>الحالة</th></tr></thead>
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>طول/وزن</th><th>المركز</th><th>اليوم</th><th>المجموعة</th><th>الحالة</th><th>تواصل</th></tr></thead>
         <tbody id="rows"></tbody></table></div>
-      <p class="note">التصدير إلى Excel / PDF وطباعة الكشوف تُضاف في النسخة الفعلية.</p>
+      <div class="tools" style="margin-top:12px"><button type="button" class="btn sm alt" id="csvBtn">تصدير Excel</button><button type="button" class="btn sm ghost" id="copyBtn">نسخ الكشف</button></div>
+      <p class="note" id="expMsg" role="status"></p>
     </div>
     <div class="panel">
       <h2>الأعداد المتاحة لكل يوم</h2>
       <p class="sub">الإدارة تحدد السعة، ويُغلق الحجز تلقائيًا عند اكتمالها.</p>
       <ul class="cap" id="cap"></ul>
+    </div>
+    <div class="panel">
+      <h2>إعلان جديد</h2>
+      <p class="sub">يظهر في شاشة الدخول وصفحة الحجز.</p>
+      <label for="at">العنوان</label><input type="text" id="at" autocomplete="off">
+      <label for="ax" style="margin-top:10px">النص</label><textarea id="ax" rows="3"></textarea>
+      <p class="err" id="aerr" role="alert"></p>
+      <button type="button" class="btn alt sm" id="apub">نشر الإعلان</button>
     </div>
   </div>
 </section>
@@ -287,7 +325,9 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
   <div class="panel" style="margin-bottom:16px">
     <h2>كشف التقييم</h2>
     <p class="sub">سجل الحضور لكل لاعب، ثم حدد القرار.</p>
-    <div class="tools"><select id="cday" aria-label="اليوم"></select></div>
+    <div class="tools"><select id="cday" aria-label="اليوم"></select><select id="cgrp" aria-label="المجموعة"></select></div>
+    <div class="tools"><input type="text" id="scan" placeholder="كود اللاعب مثل TB-0001" dir="ltr" aria-label="كود اللاعب"><button type="button" class="btn sm alt" id="scanBtn">تسجيل حضور</button><button type="button" class="btn sm ghost" id="qrBtn" hidden>مسح QR بالكاميرا</button><input type="file" id="qrfile" class="vh" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true"></div>
+    <p class="note" id="scanMsg" role="status"></p>
   </div>
   <div class="players" id="players"></div>
 </section>
@@ -319,6 +359,18 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
     <p class="sub">حالة كل لاعب وحضوره، مع ملاحظات التحليل.</p>
     <div class="tools"><select id="py" aria-label="سنة الميلاد"><option value="">كل السنوات</option></select></div>
     <div class="perf" id="perfList"></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h2>مكتبة الفيديو</h2>
+    <p class="sub">أضف رابط فيديو من التدريب وعلّق عليه واربطه باللاعب.</p>
+    <div class="row">
+      <div><label for="vp">اللاعب</label><select id="vp"></select></div>
+      <div><label for="vu">رابط الفيديو</label><input type="text" id="vu" dir="ltr" style="text-align:end" placeholder="https://"></div>
+    </div>
+    <label for="vc" style="margin-top:10px">تعليق</label><input type="text" id="vc" autocomplete="off">
+    <p class="err" id="verr" role="alert"></p>
+    <button type="button" class="btn alt sm" id="vadd">إضافة الفيديو</button>
+    <ul class="vl" id="vlist" style="margin-top:14px"></ul>
   </div>
 </section>
 
@@ -382,36 +434,11 @@ function renderSlots(){
     return '<input type="radio" name="slot" id="s_'+d.id+'" value="'+d.id+'"'+(left<=0?' disabled':'')+(keep===d.id?' checked':'')+'><label for="s_'+d.id+'">'+d.name+' · متبقي '+Math.max(left,0)+'</label>';
   }).join("");
 }
-function renderAdmin(){
-  $("sAll").textContent=players.length;
-  $("sAtt").textContent=players.filter(function(p){return p.att}).length;
-  $("sPass").textContent=players.filter(function(p){return p.st==="pass"}).length;
-  $("sRetry").textContent=players.filter(function(p){return p.st==="retry"}).length;
-  var q=$("q").value.trim(),fy=$("fy").value,fs=$("fs").value;
-  var list=players.filter(function(p){return(!q||p.name.indexOf(q)>-1||p.code.toLowerCase().indexOf(q.toLowerCase())>-1)&&(!fy||p.year===fy)&&(!fs||p.st===fs)});
-  $("rows").innerHTML=list.length?list.map(function(p){
-    return '<tr><td class="code">'+p.code+'</td><td>'+(p.photo?'<img class="th" alt="" src="'+p.photo+'"> ':'')+esc(p.name)+'</td><td>'+esc(p.year)+'</td><td>'+(p.ht?p.ht+'/'+p.wt:'-')+'</td><td>'+esc(p.pos)+'</td><td>'+dayName(p.day)+'</td><td><span class="pill '+p.st+'">'+ST[p.st]+'</span></td></tr>';
-  }).join(""):'<tr><td colspan="7">لا توجد نتائج مطابقة.</td></tr>';
-  $("cap").innerHTML=DAYS.map(function(d){
-    var u=used(d.id),pc=Math.min(100,Math.round(u/d.cap*100));
-    return '<li><div class="top"><span>'+d.name+'</span><span>'+u+' / '+d.cap+(u>=d.cap?' · مكتمل':'')+'</span></div><div class="bar"><i class="'+(u>=d.cap?'full':'')+'" style="width:'+pc+'%"></i></div></li>';
-  }).join("");
-}
-function renderCoach(){
-  var day=$("cday").value;
-  var list=players.filter(function(p){return p.day===day});
-  $("players").innerHTML=list.length?list.map(function(p){
-    var i=players.indexOf(p);
-    function btn(k){return '<button type="button" class="'+k+'" data-i="'+i+'" data-st="'+k+'" aria-pressed="'+(p.st===k)+'">'+ST[k]+'</button>'}
-    return '<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
-      +'<div class="seg">'+btn("pass")+btn("retry")+btn("fail")+'</div></article>';
-  }).join(""):'<div class="panel">لا يوجد لاعبون في هذا اليوم بعد.</div>';
-}
 function init(){
   $("cday").innerHTML=DAYS.map(function(d){return'<option value="'+d.id+'">'+d.name+'</option>'}).join("");
   YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("fy").appendChild(o)});
   YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("py").appendChild(o)});
-  renderSlots();renderAdmin();renderCoach();
+  renderSlots();renderAdmin();renderCoach();initExtra();
 }
 var TABS={parent:"حجز التدريب",admin:"لوحة الإدارة",coach:"كشف الجهاز الفني",media:"الوسائط",med:"الحالة الطبية",perf:"تحليل الأداء"};
 var ROLES=[
@@ -457,38 +484,8 @@ $("mfile").addEventListener("change",function(e){
     var r=new FileReader();r.onload=function(){shots.push({src:r.result,cap:"صورة جديدة"});renderMedia()};r.readAsDataURL(f);
   });e.target.value="";
 });
-function renderMedia(){
-  if(!role||role.tabs.indexOf("media")<0)return;
-  var items=players.filter(function(p){return p.photo}).map(function(p){return{src:p.photo,cap:p.name}}).concat(shots);
-  var ph=players.filter(function(p){return!p.photo}).map(function(p){return'<figure><div class="ph">'+esc(p.name.charAt(0))+'</div><figcaption>'+esc(p.name)+'</figcaption></figure>'});
-  $("gallery").innerHTML=items.map(function(i){return'<figure><div class="ph"><img alt="" src="'+i.src+'"></div><figcaption>'+esc(i.cap)+'</figcaption></figure>'}).join("")+ph.join("");
-}
-function renderPerf(){
-  if(!role||role.tabs.indexOf("perf")<0)return;
-  var y=$("py").value;
-  var ev=players.filter(function(p){return!y||p.year===y});
-  var at=ev.filter(function(p){return p.att}).length,ps=ev.filter(function(p){return p.st==="pass"}).length;
-  $("pN").textContent=ev.length;$("pT").textContent=at;$("pP").textContent=ps;
-  $("pTop").textContent=(at?Math.round(ps/at*100):0)+"%";
-  $("perfList").innerHTML=ev.length?ev.map(function(p){
-    var i=players.indexOf(p);
-    return'<div class="pr"><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div>'
-      +'<div><span class="pill '+p.st+'">'+ST[p.st]+'</span> <span class="pill wait">'+(p.att?'حاضر':'غائب')+'</span></div>'
-      +'<input type="text" data-an="'+i+'" value="'+esc(p.anote||"").replace(/"/g,"&quot;")+'" placeholder="ملاحظة التحليل" aria-label="ملاحظة التحليل"></div>';
-  }).join(""):'<p class="note">لا يوجد لاعبون لهذه السنة.</p>';
-}
 $("perfList").addEventListener("input",function(e){if(e.target.dataset.an)players[e.target.dataset.an].anote=e.target.value});
 $("py").addEventListener("change",renderPerf);
-function renderMed(){
-  if(!role||role.tabs.indexOf("med")<0)return;
-  var L={ok:"سليم",inj:"إصابة",rehab:"تحت العلاج"};
-  $("medList").innerHTML=players.map(function(p,i){
-    var m=p.med||"ok";
-    return'<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div></header><div class="medsel">'
-      +["ok","inj","rehab"].map(function(k){return'<button type="button" class="'+k+'" data-mi="'+i+'" data-m="'+k+'" aria-pressed="'+(m===k)+'">'+L[k]+'</button>'}).join("")
-      +'</div><input type="text" data-mn="'+i+'" value="'+esc(p.medNote||"").replace(/"/g,"&quot;")+'" placeholder="ملاحظة طبية" aria-label="ملاحظة طبية"></article>';
-  }).join("");
-}
 $("medList").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b||!b.dataset.m)return;
   players[b.dataset.mi].med=b.dataset.m;renderMed();
@@ -522,7 +519,7 @@ $("upBtn").addEventListener("click",function(){$("up").click()});
 $("cam").addEventListener("change",onPhoto);$("up").addEventListener("change",onPhoto);
 $("form").addEventListener("submit",function(e){
   e.preventDefault();
-  var name=$("pname").value.trim(),yr=$("year").value;
+  var name=$("pname").value.trim().replace(/\s+/g," "),yr=$("year").value;
   var slot=document.querySelector("input[name=slot]:checked"),err=$("err");
   if(name.split(/\s+/).length<4){err.textContent="اكتب اسم اللاعب رباعيًا.";return}
   if(!photo){err.textContent="أضف صورة اللاعب بالتقاط صورة أو برفعها.";return}
@@ -533,19 +530,213 @@ $("form").addEventListener("submit",function(e){
   var h=+$("ht").value,w=+$("wt").value;
   if(!(h>=100&&h<=220)){err.textContent="اكتب الطول بالسنتيمتر (من 100 إلى 220).";return}
   if(!(w>=20&&w<=150)){err.textContent="اكتب الوزن بالكيلوجرام (من 20 إلى 150).";return}
+  var gp=$("gph").value.trim();
+  if(!/^01[0-9]{9}$/.test(gp)){err.textContent="رقم الهاتف يجب أن يكون 11 رقمًا ويبدأ بـ 01.";return}
   if(!slot){err.textContent="اختر موعد التدريب.";return}
   if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
   err.textContent="";
   var pp=document.querySelector("input[name=pos]:checked");
   if(!pp){err.textContent="اختر مركز اللاعب.";return}
   var pos=pp.value;
+  var dup=players.filter(function(x){return x.name===name&&x.year===yr})[0];
+  if(dup){err.textContent="هذا اللاعب مسجل بالفعل بالكود "+dup.code+".";return}
   var code="TB-"+String(players.length+1).padStart(4,"0");
-  players.push({gov:$("area").value,addr:ad,photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,st:"wait"});
-  $("tCode").textContent=code;
+  players.push({phone:gp,pubOk:$("pub").checked,consentAt:new Date().toLocaleString("ar-EG"),grp:"",log:[],inj:[],vids:[],gov:$("area").value,addr:ad,photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,st:"wait"});
+  $("tCode").textContent=code;$("qr").innerHTML=makeQr(code);
   $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>المحافظة</dt><dd>"+esc($("area").value)+"</dd><dt>العنوان</dt><dd>"+esc(ad)+"</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
   $("ticketBox").hidden=false;$("howBox").hidden=true;
   $("form").reset();photo="";$("pv").textContent="لا توجد صورة";renderSlots();
 });
+var GROUPS=["أ","ب","ج"];
+var MEDL={ok:"سليم",inj:"إصابة",rehab:"تحت العلاج"};
+players.forEach(function(p,i){p.phone="0100000"+String(1000+i);p.grp=GROUPS[i%2];p.pubOk=i<3;p.consentAt="بيانات تجريبية";p.log=[];p.inj=[];p.vids=[]});
+var ann=[{t:"فتح باب التسجيل لتدريبات الناشئين",x:"التسجيل متاح لمواليد 2010 حتى 2015. اختر اليوم المناسب من الاستمارة.",d:new Date().toLocaleDateString("ar-EG")}];
+function qa(s){return esc(s).replace(/"/g,"&quot;")}
+function nm(p,i){return'<button type="button" class="lnk" data-prof="'+i+'">'+esc(p.name)+'</button>'}
+function waLink(p){
+  var t="تذكير: موعد تدريب "+p.name+" "+dayName(p.day)+". كود اللاعب "+p.code+".";
+  return"https://wa.me/20"+p.phone.replace(/^0/,"")+"?text="+encodeURIComponent(t);
+}
+function makeQr(code){
+  if(typeof qrcode==="undefined")return"";
+  try{var q=qrcode(0,"M");q.addData(code);q.make();return q.createSvgTag({cellSize:4,margin:2,scalable:true})}catch(e){return""}
+}
+function dupKeys(){
+  var c={};players.forEach(function(p){var k=p.name+"|"+p.year;c[k]=(c[k]||0)+1});return c;
+}
+function renderAdmin(){
+  $("sAll").textContent=players.length;
+  $("sAtt").textContent=players.filter(function(p){return p.att}).length;
+  $("sPass").textContent=players.filter(function(p){return p.st==="pass"}).length;
+  $("sRetry").textContent=players.filter(function(p){return p.st==="retry"}).length;
+  var q=$("q").value.trim(),fy=$("fy").value,fs=$("fs").value,dk=dupKeys();
+  var list=players.filter(function(p){return(!q||p.name.indexOf(q)>-1||p.code.toLowerCase().indexOf(q.toLowerCase())>-1)&&(!fy||p.year===fy)&&(!fs||p.st===fs)});
+  $("rows").innerHTML=list.length?list.map(function(p){
+    var i=players.indexOf(p);
+    var g='<select data-grp="'+i+'" aria-label="المجموعة"><option value="">-</option>'+GROUPS.map(function(x){return'<option'+(p.grp===x?' selected':'')+'>'+x+'</option>'}).join("")+'</select>';
+    return'<tr><td class="code">'+p.code+'</td><td>'+(p.photo?'<img class="th" alt="" src="'+p.photo+'"> ':'')+nm(p,i)+(dk[p.name+"|"+p.year]>1?' <span class="pill retry">مكرر</span>':'')+'</td><td>'+esc(p.year)+'</td><td>'+(p.ht?p.ht+'/'+p.wt:'-')+'</td><td>'+esc(p.pos)+'</td><td>'+dayName(p.day)+'</td><td>'+g+'</td><td><span class="pill '+p.st+'">'+ST[p.st]+'</span></td><td><a href="'+waLink(p)+'" target="_blank" rel="noopener">تذكير واتساب</a></td></tr>';
+  }).join(""):'<tr><td colspan="9">لا توجد نتائج مطابقة.</td></tr>';
+  $("cap").innerHTML=DAYS.map(function(d){
+    var u=used(d.id),pc=Math.min(100,Math.round(u/d.cap*100));
+    return'<li><div class="top"><span>'+d.name+'</span><span>'+u+' / '+d.cap+(u>=d.cap?' · مكتمل':'')+'</span></div><div class="bar"><i class="'+(u>=d.cap?'full':'')+'" style="width:'+pc+'%"></i></div><button type="button" class="att" style="margin-top:6px" data-cancel="'+d.id+'">إلغاء حجز الغائبين</button></li>';
+  }).join("");
+  renderAnn();
+}
+function renderCoach(){
+  var day=$("cday").value,g=$("cgrp").value;
+  var list=players.filter(function(p){return p.day===day&&(!g||p.grp===g)});
+  $("players").innerHTML=list.length?list.map(function(p){
+    var i=players.indexOf(p);
+    function btn(k){return'<button type="button" class="'+k+'" data-i="'+i+'" data-st="'+k+'" aria-pressed="'+(p.st===k)+'">'+ST[k]+'</button>'}
+    return'<article class="player"><header><div><h3>'+nm(p,i)+(p.med&&p.med!=="ok"?' <span class="pill fail">غير جاهز</span>':'')+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+(p.grp?' · مجموعة '+p.grp:'')+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
+      +'<div class="seg">'+btn("pass")+btn("retry")+btn("fail")+'</div></article>';
+  }).join(""):'<div class="panel">لا يوجد لاعبون في هذا اليوم والمجموعة.</div>';
+}
+function renderMedia(){
+  if(!role||role.tabs.indexOf("media")<0)return;
+  var ok=players.filter(function(p){return p.pubOk}),hid=players.length-ok.length;
+  var items=ok.map(function(p){return p.photo?{src:p.photo,cap:p.name}:{src:"",cap:p.name}}).concat(shots);
+  $("gallery").innerHTML=items.map(function(i){
+    return'<figure><div class="ph">'+(i.src?'<img alt="" src="'+i.src+'">':esc(i.cap.charAt(0)))+'</div><figcaption>'+esc(i.cap)+'</figcaption></figure>';
+  }).join("")+(hid?'<p class="note" style="grid-column:1/-1">'+hid+' لاعب لم يوافق ولي أمره على نشر الصور، ولا تظهر صورهم هنا.</p>':'');
+}
+function renderPerf(){
+  if(!role||role.tabs.indexOf("perf")<0)return;
+  var y=$("py").value;
+  var ev=players.filter(function(p){return!y||p.year===y});
+  var at=ev.filter(function(p){return p.att}).length,ps=ev.filter(function(p){return p.st==="pass"}).length;
+  $("pN").textContent=ev.length;$("pT").textContent=at;$("pP").textContent=ps;
+  $("pTop").textContent=(at?Math.round(ps/at*100):0)+"%";
+  $("perfList").innerHTML=ev.length?ev.map(function(p){
+    var i=players.indexOf(p);
+    return'<div class="pr"><div><h3>'+nm(p,i)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div>'
+      +'<div><span class="pill '+p.st+'">'+ST[p.st]+'</span> <span class="pill wait">'+(p.att?'حاضر':'غائب')+'</span></div>'
+      +'<input type="text" data-an="'+i+'" value="'+qa(p.anote||"")+'" placeholder="ملاحظة التحليل" aria-label="ملاحظة التحليل"></div>';
+  }).join(""):'<p class="note">لا يوجد لاعبون لهذه السنة.</p>';
+  var keep=$("vp").value;
+  $("vp").innerHTML=players.map(function(p,i){return'<option value="'+i+'">'+esc(p.name)+'</option>'}).join("");
+  if(keep)$("vp").value=keep;
+  var vs=[];players.forEach(function(p){p.vids.forEach(function(v){vs.push('<li><b>'+esc(p.name)+'</b> · <a href="'+qa(v.u)+'" target="_blank" rel="noopener">فتح الفيديو</a>'+(v.c?' · '+esc(v.c):'')+'</li>')})});
+  $("vlist").innerHTML=vs.length?vs.join(""):'<li class="note">لا توجد فيديوهات بعد.</li>';
+}
+function renderMed(){
+  if(!role||role.tabs.indexOf("med")<0)return;
+  $("medList").innerHTML=players.map(function(p,i){
+    var m=p.med||"ok";
+    return'<article class="player"><header><div><h3>'+nm(p,i)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div></header><div class="medsel">'
+      +["ok","inj","rehab"].map(function(k){return'<button type="button" class="'+k+'" data-mi="'+i+'" data-m="'+k+'" aria-pressed="'+(m===k)+'">'+MEDL[k]+'</button>'}).join("")
+      +'</div><input type="text" data-mn="'+i+'" value="'+qa(p.medNote||"")+'" placeholder="ملاحظة طبية" aria-label="ملاحظة طبية">'
+      +'<div class="injf"><input type="text" id="it'+i+'" placeholder="نوع الإصابة" aria-label="نوع الإصابة"><input type="date" id="ir'+i+'" aria-label="تاريخ العودة المتوقع"><button type="button" class="att" data-addinj="'+i+'">تسجيل إصابة</button></div>'
+      +(p.inj.length?'<ul class="vl">'+p.inj.map(function(x){return'<li>'+esc(x.t)+(x.r?' · عودة متوقعة '+esc(x.r):'')+'</li>'}).join("")+'</ul>':'')
+      +'</article>';
+  }).join("");
+}
+var prof=-1;
+function renderProfile(){
+  var box=$("profile");
+  if(prof<0||!role){box.hidden=true;return}
+  var p=players[prof],doc=role.id==="doc",adm=role.id==="admin",m=p.med||"ok";
+  var rows=[["الكود",p.code],["سنة الميلاد",p.year],["المركز",p.pos],["التدريب",dayName(p.day)+(p.grp?" · مجموعة "+p.grp:"")],["الحضور",p.att?"حاضر":"غائب"],["القرار",ST[p.st]],["الجاهزية",m==="ok"?"جاهز":"غير جاهز"],["موافقة ولي الأمر",p.consentAt||"-"],["نشر الصور",p.pubOk?"موافق":"غير موافق"]];
+  if(p.gov)rows.splice(3,0,["المحافظة",p.gov]);
+  if(adm){if(p.addr)rows.splice(4,0,["العنوان",p.addr]);rows.push(["هاتف ولي الأمر",p.phone||"-"])}
+  var log=(p.ht&&!p.log.length?[{d:"عند التسجيل",ht:p.ht,wt:p.wt}]:[]).concat(p.log);
+  box.innerHTML='<div class="pfh"><div class="pfph">'+(p.photo?'<img alt="" src="'+p.photo+'">':esc(p.name.charAt(0)))+'</div><div><h2>'+esc(p.name)+'</h2><div class="meta">'+p.code+'</div></div><button type="button" class="att" id="pclose" style="margin-inline-start:auto">إغلاق</button></div>'
+    +'<dl class="pfd">'+rows.map(function(r){return'<dt>'+r[0]+'</dt><dd>'+esc(String(r[1]))+'</dd>'}).join("")+'</dl>'
+    +(doc?'<h3>السجل الطبي</h3><p>'+MEDL[m]+(p.medNote?' · '+esc(p.medNote):'')+'</p>'+(p.inj.length?'<ul class="vl">'+p.inj.map(function(x){return'<li>'+esc(x.t)+(x.r?' · عودة متوقعة '+esc(x.r):'')+'</li>'}).join("")+'</ul>':'<p class="note">لا توجد إصابات مسجلة.</p>'):'')
+    +'<h3>الطول والوزن عبر الوقت</h3><div class="tablebox"><table style="min-width:280px"><thead><tr><th>التاريخ</th><th>الطول (سم)</th><th>الوزن (كجم)</th></tr></thead><tbody>'
+    +(log.length?log.map(function(x){return'<tr><td>'+esc(x.d)+'</td><td>'+x.ht+'</td><td>'+x.wt+'</td></tr>'}).join(""):'<tr><td colspan="3">لا توجد قياسات.</td></tr>')+'</tbody></table></div>'
+    +'<div class="injf"><input type="text" id="plht" inputmode="numeric" placeholder="الطول" dir="ltr" aria-label="الطول"><input type="text" id="plwt" inputmode="numeric" placeholder="الوزن" dir="ltr" aria-label="الوزن"><button type="button" class="att" id="pladd">إضافة قياس</button></div>'
+    +(p.vids.length?'<h3>فيديوهات التحليل</h3><ul class="vl">'+p.vids.map(function(v){return'<li><a href="'+qa(v.u)+'" target="_blank" rel="noopener">فتح الفيديو</a>'+(v.c?' · '+esc(v.c):'')+'</li>'}).join("")+'</ul>':'')
+    +(p.anote?'<h3>ملاحظة المحلل</h3><p>'+esc(p.anote)+'</p>':'');
+  box.hidden=false;
+}
+function renderAnn(){
+  var h=ann.map(function(a,i){
+    var wa="https://wa.me/?text="+encodeURIComponent(a.t+"\n"+a.x);
+    return'<article class="ann"><h3>'+esc(a.t)+'</h3><p>'+esc(a.x)+'</p><div class="annf"><span class="meta">'+esc(a.d)+'</span><a class="btn sm ghost" href="'+wa+'" target="_blank" rel="noopener">مشاركة واتساب</a>'+(role&&role.id==="admin"?'<button type="button" class="att" data-delann="'+i+'">حذف</button>':'')+'</div></article>';
+  }).join("");
+  var box=h?'<h2 style="font-size:18px">الإعلانات</h2>'+h:"";
+  $("annLogin").innerHTML=box;$("annParent").innerHTML=h?'<div class="panel" style="margin-bottom:16px">'+box+'</div>':"";
+}
+function csvText(){
+  var head=["الكود","الاسم","سنة الميلاد","المركز","المحافظة","العنوان","الطول","الوزن","هاتف ولي الأمر","اليوم","المجموعة","القرار","الحضور"];
+  var q=function(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"'};
+  return[head].concat(players.map(function(p){return[p.code,p.name,p.year,p.pos,p.gov,p.addr,p.ht,p.wt,p.phone,dayName(p.day),p.grp,ST[p.st],p.att?"حاضر":"غائب"]})).map(function(r){return r.map(q).join(",")}).join("\r\n");
+}
+function say(id,t){$(id).textContent=t}
+function checkIn(code){
+  var c=code.trim().toUpperCase(),p=players.filter(function(x){return x.code.toUpperCase()===c})[0];
+  if(!p){say("scanMsg","لا يوجد لاعب بالكود "+c+".");return}
+  p.att=true;say("scanMsg","تم تسجيل حضور "+p.name+".");$("scan").value="";renderCoach();renderAdmin();
+}
+function initExtra(){
+  $("cgrp").innerHTML='<option value="">كل المجموعات</option>'+GROUPS.map(function(g){return'<option value="'+g+'">مجموعة '+g+'</option>'}).join("");
+  $("cgrp").addEventListener("change",renderCoach);
+  if(window.BarcodeDetector)$("qrBtn").hidden=false;
+  renderAnn();
+}
+document.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.prof!=null&&b.dataset.prof!==""){prof=+b.dataset.prof;renderProfile();$("profile").scrollIntoView({block:"start"});return}
+  if(b.id==="pclose"){prof=-1;renderProfile();return}
+  if(b.id==="pladd"){
+    var h=+$("plht").value,w=+$("plwt").value;
+    if(h>=100&&h<=220&&w>=20&&w<=150){var p=players[prof];p.ht=h;p.wt=w;p.log.push({d:new Date().toLocaleDateString("ar-EG"),ht:h,wt:w});renderProfile()}
+    return;
+  }
+  if(b.dataset.cancel){
+    if(b.dataset.armed){
+      var d=b.dataset.cancel;
+      players=players.filter(function(p){return!(p.day===d&&!p.att&&p.st==="wait")});
+      prof=-1;renderProfile();renderAdmin();renderSlots();renderCoach();return;
+    }
+    b.dataset.armed="1";b.textContent="اضغط مرة أخرى للتأكيد";
+    setTimeout(function(){if(b.isConnected){delete b.dataset.armed;b.textContent="إلغاء حجز الغائبين"}},4000);return;
+  }
+  if(b.dataset.addinj!=null&&b.dataset.addinj!==""){
+    var i=+b.dataset.addinj,t=$("it"+i).value.trim();
+    if(t){players[i].inj.push({t:t,r:$("ir"+i).value});players[i].med=players[i].med==="ok"||!players[i].med?"inj":players[i].med;renderMed()}
+    return;
+  }
+  if(b.dataset.delann!=null&&b.dataset.delann!==""){ann.splice(+b.dataset.delann,1);renderAnn();return}
+});
+document.addEventListener("change",function(e){
+  var s=e.target;if(s.dataset&&s.dataset.grp!=null&&s.dataset.grp!==""){players[+s.dataset.grp].grp=s.value;renderCoach()}
+});
+$("logout").addEventListener("click",function(){prof=-1;$("profile").hidden=true});
+$("csvBtn").addEventListener("click",function(){
+  var txt="﻿"+csvText();
+  try{
+    var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));a.download="tachnoball-players.csv";document.body.appendChild(a);a.click();a.remove();
+    say("expMsg","تم تجهيز ملف Excel. لو لم يبدأ التنزيل استخدم زر النسخ.");
+  }catch(err){say("expMsg","تعذر التنزيل. استخدم زر النسخ.")}
+});
+$("copyBtn").addEventListener("click",function(){
+  var txt=csvText();
+  function fb(){var t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand("copy");say("expMsg","تم نسخ الكشف. الصقه في Excel.")}catch(x){say("expMsg","تعذر النسخ.")}t.remove()}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){say("expMsg","تم نسخ الكشف. الصقه في Excel.")},fb);else fb();
+});
+$("apub").addEventListener("click",function(){
+  var t=$("at").value.trim(),x=$("ax").value.trim();
+  if(!t||!x){say("aerr","اكتب عنوان الإعلان ونصه.");return}
+  ann.unshift({t:t,x:x,d:new Date().toLocaleDateString("ar-EG")});$("at").value="";$("ax").value="";say("aerr","");renderAnn();
+});
+$("scanBtn").addEventListener("click",function(){checkIn($("scan").value)});
+$("scan").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();checkIn($("scan").value)}});
+$("qrBtn").addEventListener("click",function(){$("qrfile").click()});
+$("qrfile").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;
+  createImageBitmap(f).then(function(bm){return new BarcodeDetector({formats:["qr_code"]}).detect(bm)}).then(function(r){
+    if(r.length)checkIn(r[0].rawValue);else say("scanMsg","لم يتم العثور على QR في الصورة.");
+  }).catch(function(){say("scanMsg","تعذر قراءة الصورة.")});
+  e.target.value="";
+});
+$("vadd").addEventListener("click",function(){
+  var u=$("vu").value.trim();
+  if(!/^https?:\/\//i.test(u)){say("verr","اكتب رابط الفيديو يبدأ بـ https.");return}
+  players[+$("vp").value].vids.push({u:u,c:$("vc").value.trim()});$("vu").value="";$("vc").value="";say("verr","");renderPerf();
+});
+$("printBtn").addEventListener("click",function(){try{window.print()}catch(x){}});
 init();
 </script>
 </html>
