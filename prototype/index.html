@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kabo Junior 2010</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Reem+Kufi:wght@600;700&display=swap">
+<style>
+/* Layout: sticky club header, three role tabs (parent booking / admin desk / coach sheet), single column on phone, 2-col on desktop */
+:root{
+  --bg:#f3f5f1; --surface:#ffffff; --fg:#14231c; --muted:#5b6b62; --line:#d9e0da;
+  --pitch:#0f4d38; --pitch-fg:#ffffff; --signal:#e8590c; --signal-soft:#fde8dc;
+  --ok:#1b7f4b; --ok-soft:#dcf2e5; --warn:#a86a00; --warn-soft:#fbefd2; --bad:#b3261e; --bad-soft:#f9dedc;
+  --display:"Reem Kufi","Cairo",system-ui,sans-serif; --body:"Cairo",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1612; --surface:#15221b; --fg:#e6efe9; --muted:#93a69b; --line:#27382f;
+  --pitch:#2f9a73; --pitch-fg:#06150f; --signal:#ff8a4c; --signal-soft:#3a2216;
+  --ok:#5ed08f; --ok-soft:#14301f; --warn:#e6b04a; --warn-soft:#33270d; --bad:#ff8a80; --bad-soft:#3a1816; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1612; --surface:#15221b; --fg:#e6efe9; --muted:#93a69b; --line:#27382f;
+  --pitch:#2f9a73; --pitch-fg:#06150f; --signal:#ff8a4c; --signal-soft:#3a2216;
+  --ok:#5ed08f; --ok-soft:#14301f; --warn:#e6b04a; --warn-soft:#33270d; --bad:#ff8a80; --bad-soft:#3a1816; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.7 var(--body);padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin-inline:auto}
+header{display:flex;align-items:center;gap:14px;padding-block:20px 8px;flex-wrap:wrap}
+.crest{width:56px;height:56px;border-radius:50%;background:var(--pitch);color:var(--pitch-fg);display:grid;place-items:center;font:700 22px var(--display);flex:none;box-shadow:inset 0 0 0 3px var(--bg),inset 0 0 0 5px var(--signal)}
+header h1{font:700 clamp(26px,5vw,38px)/1.15 var(--display);margin:0}
+header p{margin:0;color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:6px;margin-block:16px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tabs button{font:600 15px var(--body);background:none;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--pitch);border-color:var(--signal)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.sample{display:inline-block;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.panel h2{font:700 22px var(--display);margin:0 0 4px}
+.panel .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{font:700 13px var(--body);color:var(--pitch);letter-spacing:.04em;margin-bottom:8px;padding:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+input[type=text],input[type=tel],select{width:100%;font:400 16px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label{margin:0;padding:7px 14px;border:1.5px solid var(--line);border-radius:99px;cursor:pointer;font-weight:600;font-size:14px;background:var(--bg)}
+.chips input:checked+label{background:var(--pitch);color:var(--pitch-fg);border-color:var(--pitch)}
+.chips input:focus-visible+label{outline:3px solid var(--signal);outline-offset:2px}
+.chips input:disabled+label{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted)}
+.consent input{margin-top:6px;accent-color:var(--pitch)}
+.btn{font:700 17px var(--body);background:var(--signal);color:#fff;border:0;border-radius:12px;padding:12px 22px;cursor:pointer;width:100%}
+.btn.alt{background:var(--pitch);color:var(--pitch-fg)}
+.err{color:var(--bad);font-size:13px;min-height:20px;margin:6px 0 0}
+.ticket{border:2px dashed var(--pitch);border-radius:14px;padding:18px;text-align:center;background:var(--bg)}
+.ticket .code{font:700 34px var(--display);letter-spacing:.06em;color:var(--signal);direction:ltr}
+.ticket dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;text-align:start;margin:14px 0 0;font-size:14px}
+.ticket dt{color:var(--muted)} .ticket dd{margin:0;font-weight:600}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px}
+.steps li{display:flex;gap:10px;align-items:flex-start}
+.steps b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--pitch);color:var(--pitch-fg);display:grid;place-items:center;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.stat strong{display:block;font:700 30px/1.2 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.cap{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.cap .top{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pitch);border-radius:99px}
+.bar i.full{background:var(--signal)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools select,.tools input{width:auto;flex:1 1 140px}
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th{text-align:start;color:var(--muted);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:2px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitch);font-weight:700}
+.pill{display:inline-block;padding:1px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.pill.pass{background:var(--ok-soft);color:var(--ok)} .pill.retry{background:var(--warn-soft);color:var(--warn)}
+.pill.fail{background:var(--bad-soft);color:var(--bad)} .pill.wait{background:var(--line);color:var(--muted)}
+.player{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;background:var(--surface)}
+.players{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.player header{padding:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.player h3{margin:0;font-size:16px}
+.player .meta{font-size:12px;color:var(--muted)}
+.score{display:grid;grid-template-columns:60px 1fr 28px;gap:8px;align-items:center;font-size:13px}
+.score input{accent-color:var(--pitch);width:100%}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{font:600 13px var(--body);padding:6px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed=true].pass{background:var(--ok);color:#fff;border-color:var(--ok)}
+.seg button[aria-pressed=true].retry{background:var(--warn);color:#fff;border-color:var(--warn)}
+.seg button[aria-pressed=true].fail{background:var(--bad);color:#fff;border-color:var(--bad)}
+.att{font:600 13px var(--body);border-radius:99px;padding:3px 12px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer}
+.att[aria-pressed=true]{background:var(--pitch);color:var(--pitch-fg);border-color:var(--pitch)}
+.note{font-size:13px;color:var(--muted);margin-top:14px}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+<header>
+  <div class="crest" aria-hidden="true">K</div>
+  <div>
+    <h1>Kabo Junior 2010</h1>
+    <p>نادي كابو – شركة النصر للملابس والمنسوجات · قطاع الناشئين والبراعم</p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+  <button role="tab" id="t-parent" aria-selected="true" data-tab="parent">حجز الاختبار (ولي الأمر)</button>
+  <button role="tab" id="t-admin" aria-selected="false" data-tab="admin">لوحة الإدارة</button>
+  <button role="tab" id="t-coach" aria-selected="false" data-tab="coach">كشف الجهاز الفني</button>
+</div>
+<p><span class="sample">تصميم مبدئي · مواعيد وأسماء تجريبية</span></p>
+
+<!-- PARENT -->
+<section id="parent" class="grid" aria-labelledby="t-parent">
+  <div class="panel">
+    <h2>استمارة اختبارات الناشئين</h2>
+    <p class="sub">املأ البيانات واحجز موعد ابنك. ستحصل على كود حجز خاص به.</p>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>بيانات اللاعب</legend>
+        <label for="pname">الاسم الرباعي</label>
+        <input type="text" id="pname" autocomplete="off">
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="year">سنة الميلاد</label>
+            <select id="year"><option value="">اختر</option><option>2010</option><option>2011</option><option>2012</option><option>2013</option><option>2014</option><option>2015 أو أحدث</option></select>
+          </div>
+          <div>
+            <label for="area">محل الإقامة / المنطقة</label>
+            <input type="text" id="area" autocomplete="off">
+          </div>
+        </div>
+        <label style="margin-top:12px">المركز الأساسي</label>
+        <div class="chips" id="pos">
+          <input type="radio" name="pos" id="p1" value="حارس مرمى"><label for="p1">حارس مرمى</label>
+          <input type="radio" name="pos" id="p2" value="مدافع"><label for="p2">مدافع</label>
+          <input type="radio" name="pos" id="p3" value="خط وسط"><label for="p3">خط وسط</label>
+          <input type="radio" name="pos" id="p4" value="مهاجم"><label for="p4">مهاجم</label>
+          <input type="radio" name="pos" id="p5" value="أي مركز" checked><label for="p5">لم يحدد</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>بيانات ولي الأمر</legend>
+        <div class="row">
+          <div><label for="gname">اسم ولي الأمر</label><input type="text" id="gname" autocomplete="off"></div>
+          <div><label for="phone">رقم الهاتف</label><input type="tel" id="phone" inputmode="numeric" placeholder="01XXXXXXXXX" dir="ltr" style="text-align:end"></div>
+        </div>
+        <label style="margin-top:12px">هل سبق للاعب الانضمام إلى نادٍ أو أكاديمية؟</label>
+        <div class="chips">
+          <input type="radio" name="prev" id="v1" value="نعم"><label for="v1">نعم</label>
+          <input type="radio" name="prev" id="v2" value="لا" checked><label for="v2">لا</label>
+        </div>
+        <p class="note" style="margin-top:6px">النادي السابق لا يؤثر على قبول التسجيل.</p>
+      </fieldset>
+      <fieldset>
+        <legend>موعد الاختبار</legend>
+        <div class="chips" id="slots"></div>
+      </fieldset>
+      <fieldset>
+        <label class="consent"><input type="checkbox" id="consent">
+          <span>أوافق على تسجيل ابني في الاختبارات وعلى معالجة بياناته وصورته داخل النادي فقط، وألتزم بتعليمات الاختبار وأقر بسلامته الصحية لأداء المجهود البدني.</span></label>
+      </fieldset>
+      <button class="btn" type="submit">تأكيد الحجز</button>
+      <p class="err" id="err" role="alert"></p>
+    </form>
+  </div>
+
+  <aside class="panel">
+    <div id="ticketBox" hidden>
+      <h2>تم الحجز</h2>
+      <p class="sub">احتفظ بهذا الكود وأحضره يوم الاختبار.</p>
+      <div class="ticket">
+        <div class="code" id="tCode"></div>
+        <dl id="tInfo"></dl>
+      </div>
+      <p class="note">هذا العرض تجريبي ولا يحفظ بياناتك خارج هذه الصفحة.</p>
+    </div>
+    <div id="howBox">
+      <h2>خطوات التسجيل</h2>
+      <p class="sub">دقيقتان من الموبايل بدون تحميل تطبيق.</p>
+      <ol class="steps">
+        <li><b>١</b><span>اختر سنة الميلاد وسجل بيانات اللاعب وولي الأمر.</span></li>
+        <li><b>٢</b><span>اختر اليوم المناسب. الأيام المكتملة تظهر معطلة.</span></li>
+        <li><b>٣</b><span>استلم كود الحجز وأحضره مع شهادة الميلاد وصورة حديثة.</span></li>
+        <li><b>٤</b><span>يحضر اللاعب قبل الموعد بنصف ساعة بالزي الرياضي.</span></li>
+      </ol>
+    </div>
+  </aside>
+</section>
+
+<!-- ADMIN -->
+<section id="admin" hidden aria-labelledby="t-admin">
+  <div class="stats">
+    <div class="stat"><strong id="sAll">0</strong><span>إجمالي المتقدمين</span></div>
+    <div class="stat"><strong id="sAtt">0</strong><span>حضروا</span></div>
+    <div class="stat"><strong id="sPass">0</strong><span>اجتازوا</span></div>
+    <div class="stat"><strong id="sRetry">0</strong><span>إعادة اختبار</span></div>
+  </div>
+  <div class="grid">
+    <div class="panel">
+      <h2>المتقدمون</h2>
+      <p class="sub">بحث وتصفية. البيانات والأرقام للمسؤولين فقط.</p>
+      <div class="tools">
+        <input type="text" id="q" placeholder="بحث بالاسم أو الكود" aria-label="بحث">
+        <select id="fy" aria-label="سنة الميلاد"><option value="">كل السنوات</option></select>
+        <select id="fs" aria-label="الحالة"><option value="">كل الحالات</option><option value="wait">بانتظار الاختبار</option><option value="pass">اجتاز</option><option value="retry">إعادة اختبار</option><option value="fail">لم يجتز</option></select>
+      </div>
+      <div class="tablebox"><table>
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>المركز</th><th>اليوم</th><th>الحالة</th></tr></thead>
+        <tbody id="rows"></tbody></table></div>
+      <p class="note">التصدير إلى Excel / PDF وطباعة الكشوف تُضاف في النسخة الفعلية.</p>
+    </div>
+    <div class="panel">
+      <h2>الأعداد المتاحة لكل يوم</h2>
+      <p class="sub">الإدارة تحدد السعة، ويُغلق الحجز تلقائيًا عند اكتمالها.</p>
+      <ul class="cap" id="cap"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- COACH -->
+<section id="coach" hidden aria-labelledby="t-coach">
+  <div class="panel" style="margin-bottom:16px">
+    <h2>كشف التقييم</h2>
+    <p class="sub">سجل الحضور وقيّم كل لاعب من 10 في المهارة والبدنية، ثم حدد القرار.</p>
+    <div class="tools"><select id="cday" aria-label="اليوم"></select></div>
+  </div>
+  <div class="players" id="players"></div>
+</section>
+</div>
+
+<script>
+var DAYS=[
+  {id:"d1",name:"اليوم الأول",cap:40},
+  {id:"d2",name:"اليوم الثاني",cap:40},
+  {id:"d3",name:"اليوم الثالث",cap:30}
+];
+var YEARS=["2010","2011","2012","2013","2014","2015 أو أحدث"];
+var seed=[
+  ["أحمد محمد علي حسن","2010","مهاجم","d1",1,8,7,"pass"],
+  ["يوسف محمود سعيد إبراهيم","2010","خط وسط","d1",1,6,6,"retry"],
+  ["عمر خالد مصطفى فتحي","2011","مدافع","d1",1,5,4,"fail"],
+  ["مازن طارق عادل رضا","2012","حارس مرمى","d2",0,0,0,"wait"],
+  ["ياسين هاني كمال السيد","2010","مدافع","d2",0,0,0,"wait"],
+  ["آدم وليد صلاح نصر","2013","خط وسط","d3",0,0,0,"wait"]
+];
+var players=seed.map(function(s,i){return{code:"KJ-"+String(i+1).padStart(4,"0"),name:s[0],year:s[1],pos:s[2],day:s[3],att:!!s[4],tech:s[5],phys:s[6],st:s[7]}});
+var ST={pass:"اجتاز",retry:"إعادة اختبار",fail:"لم يجتز",wait:"بانتظار الاختبار"};
+var $=function(i){return document.getElementById(i)};
+function dayName(id){return DAYS.filter(function(d){return d.id===id})[0].name}
+function used(id){return players.filter(function(p){return p.day===id}).length}
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+
+function renderSlots(){
+  var sel=document.querySelector("input[name=slot]:checked");var keep=sel&&sel.value;
+  $("slots").innerHTML=DAYS.map(function(d){
+    var left=d.cap-used(d.id);
+    return '<input type="radio" name="slot" id="s_'+d.id+'" value="'+d.id+'"'+(left<=0?' disabled':'')+(keep===d.id?' checked':'')+'><label for="s_'+d.id+'">'+d.name+' · متبقي '+Math.max(left,0)+'</label>';
+  }).join("");
+}
+function renderAdmin(){
+  $("sAll").textContent=players.length;
+  $("sAtt").textContent=players.filter(function(p){return p.att}).length;
+  $("sPass").textContent=players.filter(function(p){return p.st==="pass"}).length;
+  $("sRetry").textContent=players.filter(function(p){return p.st==="retry"}).length;
+  var q=$("q").value.trim(),fy=$("fy").value,fs=$("fs").value;
+  var list=players.filter(function(p){return(!q||p.name.indexOf(q)>-1||p.code.toLowerCase().indexOf(q.toLowerCase())>-1)&&(!fy||p.year===fy)&&(!fs||p.st===fs)});
+  $("rows").innerHTML=list.length?list.map(function(p){
+    return '<tr><td class="code">'+p.code+'</td><td>'+esc(p.name)+'</td><td>'+esc(p.year)+'</td><td>'+esc(p.pos)+'</td><td>'+dayName(p.day)+'</td><td><span class="pill '+p.st+'">'+ST[p.st]+'</span></td></tr>';
+  }).join(""):'<tr><td colspan="6">لا توجد نتائج مطابقة.</td></tr>';
+  $("cap").innerHTML=DAYS.map(function(d){
+    var u=used(d.id),pc=Math.min(100,Math.round(u/d.cap*100));
+    return '<li><div class="top"><span>'+d.name+'</span><span>'+u+' / '+d.cap+(u>=d.cap?' · مكتمل':'')+'</span></div><div class="bar"><i class="'+(u>=d.cap?'full':'')+'" style="width:'+pc+'%"></i></div></li>';
+  }).join("");
+}
+function renderCoach(){
+  var day=$("cday").value;
+  var list=players.filter(function(p){return p.day===day});
+  $("players").innerHTML=list.length?list.map(function(p){
+    var i=players.indexOf(p);
+    function btn(k){return '<button type="button" class="'+k+'" data-i="'+i+'" data-st="'+k+'" aria-pressed="'+(p.st===k)+'">'+ST[k]+'</button>'}
+    return '<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
+      +'<div class="score"><span>المهارة</span><input type="range" min="0" max="10" value="'+p.tech+'" data-k="tech" data-i="'+i+'" aria-label="المهارة"><b>'+p.tech+'</b></div>'
+      +'<div class="score"><span>البدنية</span><input type="range" min="0" max="10" value="'+p.phys+'" data-k="phys" data-i="'+i+'" aria-label="البدنية"><b>'+p.phys+'</b></div>'
+      +'<div class="seg">'+btn("pass")+btn("retry")+btn("fail")+'</div></article>';
+  }).join(""):'<div class="panel">لا يوجد لاعبون في هذا اليوم بعد.</div>';
+}
+function init(){
+  $("cday").innerHTML=DAYS.map(function(d){return'<option value="'+d.id+'">'+d.name+'</option>'}).join("");
+  YEARS.forEach(function(y){var o=document.createElement("option");o.value=y;o.textContent=y;$("fy").appendChild(o)});
+  renderSlots();renderAdmin();renderCoach();
+}
+document.querySelector(".tabs").addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t)return;
+  document.querySelectorAll(".tabs button").forEach(function(b){b.setAttribute("aria-selected",b===t)});
+  ["parent","admin","coach"].forEach(function(id){$(id).hidden=id!==t.dataset.tab});
+  renderAdmin();renderCoach();
+});
+["q","fy","fs"].forEach(function(id){$(id).addEventListener("input",renderAdmin)});
+$("cday").addEventListener("change",renderCoach);
+$("players").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.st){players[b.dataset.i].st=b.dataset.st;players[b.dataset.i].att=true;renderCoach()}
+  if(b.dataset.att){var p=players[b.dataset.att];p.att=!p.att;renderCoach()}
+});
+$("players").addEventListener("input",function(e){
+  var r=e.target;if(r.type!=="range")return;
+  players[r.dataset.i][r.dataset.k]=+r.value;r.nextElementSibling.textContent=r.value;
+});
+$("form").addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=$("pname").value.trim(),g=$("gname").value.trim(),ph=$("phone").value.trim(),yr=$("year").value;
+  var slot=document.querySelector("input[name=slot]:checked"),err=$("err");
+  if(name.split(/\s+/).length<4){err.textContent="اكتب الاسم رباعيًا.";return}
+  if(!yr){err.textContent="اختر سنة الميلاد.";return}
+  if(!g){err.textContent="اكتب اسم ولي الأمر.";return}
+  if(!/^01[0-9]{9}$/.test(ph)){err.textContent="رقم الهاتف يجب أن يكون 11 رقمًا ويبدأ بـ 01.";return}
+  if(!slot){err.textContent="اختر موعد الاختبار.";return}
+  if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
+  err.textContent="";
+  var pos=document.querySelector("input[name=pos]:checked").value;
+  var code="KJ-"+String(players.length+1).padStart(4,"0");
+  players.push({code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
+  $("tCode").textContent=code;
+  $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
+  $("ticketBox").hidden=false;$("howBox").hidden=true;
+  $("form").reset();renderSlots();
+});
+init();
+</script>
+</html>
