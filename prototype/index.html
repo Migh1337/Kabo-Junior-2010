@@ -164,7 +164,7 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
     <form id="form" novalidate>
       <fieldset>
         <legend>بيانات اللاعب</legend>
-        <label for="pname">اسم اللاعب</label>
+        <label for="pname">اسم اللاعب (رباعي)</label>
         <input type="text" id="pname" autocomplete="off">
         <label style="margin-top:12px">صورة اللاعب</label>
         <div class="photo">
@@ -183,10 +183,12 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
             <select id="year"><option value="">اختر</option><option>2010</option><option>2011</option><option>2012</option><option>2013</option><option>2014</option><option>2015 أو أحدث</option></select>
           </div>
           <div>
-            <label for="area">محل الإقامة / المنطقة</label>
-            <input type="text" id="area" autocomplete="off">
+            <label for="area">المحافظة</label>
+            <select id="area"><option value="">اختر</option><option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>القليوبية</option><option>الشرقية</option><option>الدقهلية</option><option>البحيرة</option><option>المنوفية</option><option>الغربية</option><option>كفر الشيخ</option><option>دمياط</option><option>بورسعيد</option><option>الإسماعيلية</option><option>السويس</option><option>شمال سيناء</option><option>جنوب سيناء</option><option>الفيوم</option><option>بني سويف</option><option>المنيا</option><option>أسيوط</option><option>سوهاج</option><option>قنا</option><option>الأقصر</option><option>أسوان</option><option>الوادي الجديد</option><option>البحر الأحمر</option><option>مطروح</option></select>
           </div>
         </div>
+        <label for="addr" style="margin-top:12px">العنوان</label>
+        <input type="text" id="addr" autocomplete="street-address" placeholder="الشارع، المنطقة، رقم العقار">
         <div class="row" style="margin-top:12px">
           <div><label for="ht">الطول (سم)</label><input type="text" id="ht" inputmode="numeric" placeholder="مثال 165" dir="ltr" style="text-align:end"></div>
           <div><label for="wt">الوزن (كجم)</label><input type="text" id="wt" inputmode="numeric" placeholder="مثال 52" dir="ltr" style="text-align:end"></div>
@@ -199,19 +201,6 @@ textarea:focus-visible,input[type=password]:focus-visible{outline:3px solid var(
           <input type="radio" name="pos" id="p4" value="وسط مهاجم"><label for="p4">وسط مهاجم</label>
           <input type="radio" name="pos" id="p5" value="مهاجم"><label for="p5">مهاجم</label>
         </div>
-      </fieldset>
-      <fieldset>
-        <legend>بيانات ولي الأمر</legend>
-        <div class="row">
-          <div><label for="gname">اسم ولي الأمر (ثلاثي)</label><input type="text" id="gname" autocomplete="off"></div>
-          <div><label for="phone">رقم الهاتف</label><input type="tel" id="phone" inputmode="numeric" placeholder="01XXXXXXXXX" dir="ltr" style="text-align:end"></div>
-        </div>
-        <label style="margin-top:12px">هل سبق للاعب الانضمام إلى نادٍ أو أكاديمية؟</label>
-        <div class="chips">
-          <input type="radio" name="prev" id="v1" value="نعم"><label for="v1">نعم</label>
-          <input type="radio" name="prev" id="v2" value="لا" checked><label for="v2">لا</label>
-        </div>
-        <p class="note" style="margin-top:6px">النادي السابق لا يؤثر على قبول التسجيل.</p>
       </fieldset>
       <fieldset>
         <legend>موعد التدريب</legend>
@@ -470,16 +459,17 @@ function onPhoto(e){
 $("cam").addEventListener("change",onPhoto);$("up").addEventListener("change",onPhoto);
 $("form").addEventListener("submit",function(e){
   e.preventDefault();
-  var name=$("pname").value.trim(),g=$("gname").value.trim(),ph=$("phone").value.trim(),yr=$("year").value;
+  var name=$("pname").value.trim(),yr=$("year").value;
   var slot=document.querySelector("input[name=slot]:checked"),err=$("err");
-  if(name.split(/\s+/).length<3){err.textContent="اكتب اسم اللاعب ثلاثيًا على الأقل.";return}
+  if(name.split(/\s+/).length<4){err.textContent="اكتب اسم اللاعب رباعيًا.";return}
   if(!photo){err.textContent="أضف صورة اللاعب بالتقاط صورة أو برفعها.";return}
   if(!yr){err.textContent="اختر سنة الميلاد.";return}
-  if(g.split(/\s+/).length<3){err.textContent="اكتب اسم ولي الأمر ثلاثيًا.";return}
+  if(!$("area").value){err.textContent="اختر المحافظة.";return}
+  var ad=$("addr").value.trim();
+  if(ad.length<5){err.textContent="اكتب العنوان.";return}
   var h=+$("ht").value,w=+$("wt").value;
   if(!(h>=100&&h<=220)){err.textContent="اكتب الطول بالسنتيمتر (من 100 إلى 220).";return}
   if(!(w>=20&&w<=150)){err.textContent="اكتب الوزن بالكيلوجرام (من 20 إلى 150).";return}
-  if(!/^01[0-9]{9}$/.test(ph)){err.textContent="رقم الهاتف يجب أن يكون 11 رقمًا ويبدأ بـ 01.";return}
   if(!slot){err.textContent="اختر موعد التدريب.";return}
   if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
   err.textContent="";
@@ -487,9 +477,9 @@ $("form").addEventListener("submit",function(e){
   if(!pp){err.textContent="اختر مركز اللاعب.";return}
   var pos=pp.value;
   var code="TB-"+String(players.length+1).padStart(4,"0");
-  players.push({photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
+  players.push({gov:$("area").value,addr:ad,photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
   $("tCode").textContent=code;
-  $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
+  $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>المحافظة</dt><dd>"+esc($("area").value)+"</dd><dt>العنوان</dt><dd>"+esc(ad)+"</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
   $("ticketBox").hidden=false;$("howBox").hidden=true;
   $("form").reset();photo="";$("pv").textContent="لا توجد صورة";renderSlots();
 });
