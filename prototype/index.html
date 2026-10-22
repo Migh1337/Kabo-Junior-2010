@@ -51,6 +51,12 @@ input[type=text],input[type=tel],select{width:100%;font:400 16px var(--body);pad
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted)}
 .consent input{margin-top:6px;accent-color:var(--pitch)}
 .btn{font:700 17px var(--body);background:var(--signal);color:#fff;border:0;border-radius:12px;padding:12px 22px;cursor:pointer;width:100%}
+.btn.sm{display:inline-block;width:auto;font-size:14px;padding:8px 14px;margin:0;text-align:center;cursor:pointer}
+.btn.ghost{background:var(--bg);color:var(--fg);border:1.5px solid var(--line)}
+.photo{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pv{width:96px;height:120px;border-radius:12px;border:2px dashed var(--line);background:var(--bg) center/cover no-repeat;display:grid;place-items:center;text-align:center;font-size:12px;color:var(--muted);flex:none}
+.pb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1;min-width:180px}
+.pv img{width:100%;height:100%;object-fit:cover;border-radius:10px}
 .btn.alt{background:var(--pitch);color:var(--pitch-fg)}
 .err{color:var(--bad);font-size:13px;min-height:20px;margin:6px 0 0}
 .ticket{border:2px dashed var(--pitch);border-radius:14px;padding:18px;text-align:center;background:var(--bg)}
@@ -73,10 +79,11 @@ input[type=text],input[type=tel],select{width:100%;font:400 16px var(--body);pad
 .tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .tools select,.tools input{width:auto;flex:1 1 140px}
 .tablebox{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 th{text-align:start;color:var(--muted);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:2px solid var(--line)}
 td{padding:10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitch);font-weight:700}
+.th{width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-inline-end:6px}
 .pill{display:inline-block;padding:1px 10px;border-radius:99px;font-size:12px;font-weight:700}
 .pill.pass{background:var(--ok-soft);color:var(--ok)} .pill.retry{background:var(--warn-soft);color:var(--warn)}
 .pill.fail{background:var(--bad-soft);color:var(--bad)} .pill.wait{background:var(--line);color:var(--muted)}
@@ -123,8 +130,19 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
     <form id="form" novalidate>
       <fieldset>
         <legend>بيانات اللاعب</legend>
-        <label for="pname">الاسم الرباعي</label>
+        <label for="pname">اسم اللاعب (ثلاثي)</label>
         <input type="text" id="pname" autocomplete="off">
+        <label style="margin-top:12px">صورة اللاعب</label>
+        <div class="photo">
+          <div class="pv" id="pv" aria-hidden="true">لا توجد صورة</div>
+          <div class="pb">
+            <label class="btn alt sm" for="cam">التقاط صورة</label>
+            <label class="btn sm ghost" for="up">رفع من الجهاز</label>
+            <input type="file" id="cam" accept="image/*" capture="user" hidden>
+            <input type="file" id="up" accept="image/*" hidden>
+            <span class="note" style="margin:0">صورة حديثة وواضحة للوجه.</span>
+          </div>
+        </div>
         <div class="row" style="margin-top:12px">
           <div>
             <label for="year">سنة الميلاد</label>
@@ -134,6 +152,10 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
             <label for="area">محل الإقامة / المنطقة</label>
             <input type="text" id="area" autocomplete="off">
           </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div><label for="ht">الطول (سم)</label><input type="text" id="ht" inputmode="numeric" placeholder="مثال 165" dir="ltr" style="text-align:end"></div>
+          <div><label for="wt">الوزن (كجم)</label><input type="text" id="wt" inputmode="numeric" placeholder="مثال 52" dir="ltr" style="text-align:end"></div>
         </div>
         <label style="margin-top:12px">المركز الأساسي</label>
         <div class="chips" id="pos">
@@ -147,7 +169,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
       <fieldset>
         <legend>بيانات ولي الأمر</legend>
         <div class="row">
-          <div><label for="gname">اسم ولي الأمر</label><input type="text" id="gname" autocomplete="off"></div>
+          <div><label for="gname">اسم ولي الأمر (ثلاثي)</label><input type="text" id="gname" autocomplete="off"></div>
           <div><label for="phone">رقم الهاتف</label><input type="tel" id="phone" inputmode="numeric" placeholder="01XXXXXXXXX" dir="ltr" style="text-align:end"></div>
         </div>
         <label style="margin-top:12px">هل سبق للاعب الانضمام إلى نادٍ أو أكاديمية؟</label>
@@ -211,7 +233,7 @@ td.code{font-family:var(--display);direction:ltr;text-align:end;color:var(--pitc
         <select id="fs" aria-label="الحالة"><option value="">كل الحالات</option><option value="wait">بانتظار الاختبار</option><option value="pass">اجتاز</option><option value="retry">إعادة اختبار</option><option value="fail">لم يجتز</option></select>
       </div>
       <div class="tablebox"><table>
-        <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>المركز</th><th>اليوم</th><th>الحالة</th></tr></thead>
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الميلاد</th><th>طول/وزن</th><th>المركز</th><th>اليوم</th><th>الحالة</th></tr></thead>
         <tbody id="rows"></tbody></table></div>
       <p class="note">التصدير إلى Excel / PDF وطباعة الكشوف تُضاف في النسخة الفعلية.</p>
     </div>
@@ -271,8 +293,8 @@ function renderAdmin(){
   var q=$("q").value.trim(),fy=$("fy").value,fs=$("fs").value;
   var list=players.filter(function(p){return(!q||p.name.indexOf(q)>-1||p.code.toLowerCase().indexOf(q.toLowerCase())>-1)&&(!fy||p.year===fy)&&(!fs||p.st===fs)});
   $("rows").innerHTML=list.length?list.map(function(p){
-    return '<tr><td class="code">'+p.code+'</td><td>'+esc(p.name)+'</td><td>'+esc(p.year)+'</td><td>'+esc(p.pos)+'</td><td>'+dayName(p.day)+'</td><td><span class="pill '+p.st+'">'+ST[p.st]+'</span></td></tr>';
-  }).join(""):'<tr><td colspan="6">لا توجد نتائج مطابقة.</td></tr>';
+    return '<tr><td class="code">'+p.code+'</td><td>'+(p.photo?'<img class="th" alt="" src="'+p.photo+'"> ':'')+esc(p.name)+'</td><td>'+esc(p.year)+'</td><td>'+(p.ht?p.ht+'/'+p.wt:'-')+'</td><td>'+esc(p.pos)+'</td><td>'+dayName(p.day)+'</td><td><span class="pill '+p.st+'">'+ST[p.st]+'</span></td></tr>';
+  }).join(""):'<tr><td colspan="7">لا توجد نتائج مطابقة.</td></tr>';
   $("cap").innerHTML=DAYS.map(function(d){
     var u=used(d.id),pc=Math.min(100,Math.round(u/d.cap*100));
     return '<li><div class="top"><span>'+d.name+'</span><span>'+u+' / '+d.cap+(u>=d.cap?' · مكتمل':'')+'</span></div><div class="bar"><i class="'+(u>=d.cap?'full':'')+'" style="width:'+pc+'%"></i></div></li>';
@@ -284,7 +306,7 @@ function renderCoach(){
   $("players").innerHTML=list.length?list.map(function(p){
     var i=players.indexOf(p);
     function btn(k){return '<button type="button" class="'+k+'" data-i="'+i+'" data-st="'+k+'" aria-pressed="'+(p.st===k)+'">'+ST[k]+'</button>'}
-    return '<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
+    return '<article class="player"><header><div><h3>'+esc(p.name)+'</h3><div class="meta">'+p.code+' · '+esc(p.year)+' · '+esc(p.pos)+(p.ht?' · '+p.ht+' سم · '+p.wt+' كجم':'')+'</div></div><button type="button" class="att" data-att="'+i+'" aria-pressed="'+p.att+'">'+(p.att?'حاضر':'غائب')+'</button></header>'
       +'<div class="score"><span>المهارة</span><input type="range" min="0" max="10" value="'+p.tech+'" data-k="tech" data-i="'+i+'" aria-label="المهارة"><b>'+p.tech+'</b></div>'
       +'<div class="score"><span>البدنية</span><input type="range" min="0" max="10" value="'+p.phys+'" data-k="phys" data-i="'+i+'" aria-label="البدنية"><b>'+p.phys+'</b></div>'
       +'<div class="seg">'+btn("pass")+btn("retry")+btn("fail")+'</div></article>';
@@ -312,24 +334,45 @@ $("players").addEventListener("input",function(e){
   var r=e.target;if(r.type!=="range")return;
   players[r.dataset.i][r.dataset.k]=+r.value;r.nextElementSibling.textContent=r.value;
 });
+var photo="";
+function onPhoto(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      var k=Math.min(1,480/Math.max(im.width,im.height)),c=document.createElement("canvas");
+      c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      photo=c.toDataURL("image/jpeg",.8);
+      $("pv").innerHTML='<img alt="صورة اللاعب" src="'+photo+'">';
+    };
+    im.src=r.result;
+  };
+  r.readAsDataURL(f);e.target.value="";
+}
+$("cam").addEventListener("change",onPhoto);$("up").addEventListener("change",onPhoto);
 $("form").addEventListener("submit",function(e){
   e.preventDefault();
   var name=$("pname").value.trim(),g=$("gname").value.trim(),ph=$("phone").value.trim(),yr=$("year").value;
   var slot=document.querySelector("input[name=slot]:checked"),err=$("err");
-  if(name.split(/\s+/).length<4){err.textContent="اكتب الاسم رباعيًا.";return}
+  if(name.split(/\s+/).length<3){err.textContent="اكتب اسم اللاعب ثلاثيًا على الأقل.";return}
+  if(!photo){err.textContent="أضف صورة اللاعب بالتقاط صورة أو برفعها.";return}
   if(!yr){err.textContent="اختر سنة الميلاد.";return}
-  if(!g){err.textContent="اكتب اسم ولي الأمر.";return}
+  if(g.split(/\s+/).length<3){err.textContent="اكتب اسم ولي الأمر ثلاثيًا.";return}
+  var h=+$("ht").value,w=+$("wt").value;
+  if(!(h>=100&&h<=220)){err.textContent="اكتب الطول بالسنتيمتر (من 100 إلى 220).";return}
+  if(!(w>=20&&w<=150)){err.textContent="اكتب الوزن بالكيلوجرام (من 20 إلى 150).";return}
   if(!/^01[0-9]{9}$/.test(ph)){err.textContent="رقم الهاتف يجب أن يكون 11 رقمًا ويبدأ بـ 01.";return}
   if(!slot){err.textContent="اختر موعد الاختبار.";return}
   if(!$("consent").checked){err.textContent="يلزم الموافقة على الإقرار لإكمال الحجز.";return}
   err.textContent="";
   var pos=document.querySelector("input[name=pos]:checked").value;
   var code="KJ-"+String(players.length+1).padStart(4,"0");
-  players.push({code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
+  players.push({photo:photo,ht:h,wt:w,code:code,name:name,year:yr,pos:pos,day:slot.value,att:false,tech:0,phys:0,st:"wait"});
   $("tCode").textContent=code;
-  $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
+  $("tInfo").innerHTML="<dt>اللاعب</dt><dd>"+esc(name)+"</dd><dt>الطول / الوزن</dt><dd>"+h+" سم / "+w+" كجم</dd><dt>الميلاد</dt><dd>"+esc(yr)+"</dd><dt>الموعد</dt><dd>"+dayName(slot.value)+"</dd><dt>المركز</dt><dd>"+esc(pos)+"</dd>";
   $("ticketBox").hidden=false;$("howBox").hidden=true;
-  $("form").reset();renderSlots();
+  $("form").reset();photo="";$("pv").textContent="لا توجد صورة";renderSlots();
 });
 init();
 </script>
