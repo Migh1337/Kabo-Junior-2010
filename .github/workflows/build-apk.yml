@@ -25,6 +25,8 @@ jobs:
         run: sed -i 's|</manifest>|    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>|' android/app/src/main/AndroidManifest.xml
       - name: Generate app icons from assets/icon.png
         run: npx @capacitor/assets generate --android --iconBackgroundColor '#0b1220' --iconBackgroundColorDark '#0b1220'
+      - name: Use the round launcher icons on every Android version
+        run: rm -rf android/app/src/main/res/mipmap-anydpi-v26
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android
